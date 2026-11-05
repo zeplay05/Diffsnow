@@ -253,10 +253,29 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
       }
     });
 
+    const handleRosterUpdate = (e) => {
+      if (e.detail && Array.isArray(e.detail)) {
+        setRosterData(prev => ({ ...prev, members: e.detail }));
+      }
+    };
+    window.addEventListener('diffsnow_roster_updated', handleRosterUpdate);
+    window.addEventListener('triples_roster_updated', handleRosterUpdate);
+
     const unsubscribe = subscribeToRosterChanges((data) => {
-      setRosterData(data);
+      if (Array.isArray(data)) {
+        setRosterData(prev => ({ ...prev, members: data }));
+      } else if (data?.members && Array.isArray(data.members)) {
+        setRosterData(prev => ({ ...prev, members: data.members }));
+      } else if (data) {
+        setRosterData(data);
+      }
     });
-    return () => unsubscribe();
+
+    return () => {
+      window.removeEventListener('diffsnow_roster_updated', handleRosterUpdate);
+      window.removeEventListener('triples_roster_updated', handleRosterUpdate);
+      unsubscribe();
+    };
   }, []);
 
   const currentRoster = ALL_ROSTERS.find(r => r.id === tab);
@@ -1114,7 +1133,7 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
               <GlassCard style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                 <span style={{ fontSize: '10px', fontWeight: '900', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '12px' }}>TOTAL MEMBERS</span>
                 <span style={{ fontSize: '2.4rem', fontWeight: '900', color: '#ffffff', lineHeight: 1 }}>
-                  {Object.values(rosterData).reduce((sum, list) => sum + (list?.length || 0), 0)}
+                  {(rosterData['members'] || []).length}
                 </span>
               </GlassCard>
               <GlassCard style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
