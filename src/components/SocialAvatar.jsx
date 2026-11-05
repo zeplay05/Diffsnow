@@ -8,11 +8,12 @@ export function getSocialAvatarList(member) {
   if (!member) return [];
   const list = [];
 
-  // 1. Direct Image URL
-  if (member.imageUrl && member.imageUrl.trim().startsWith('http')) {
-    list.push(member.imageUrl.trim());
-  } else if (member.avatar && member.avatar.trim().startsWith('http')) {
-    list.push(member.avatar.trim());
+  // 1. Direct Image URL (HTTP, Base64 data URL, or Blob)
+  const rawImg = (member.imageUrl || member.avatar || '').trim();
+  if (rawImg && !rawImg.includes('LOGO DIFFSNOW') && !rawImg.includes('LOGO_NO.BK_Sameweknow') && !rawImg.includes('LOGO%20DIFFSNOW')) {
+    if (rawImg.startsWith('http') || rawImg.startsWith('data:image/') || rawImg.startsWith('blob:') || rawImg.startsWith('/asset/')) {
+      list.push(rawImg);
+    }
   }
 
   // 2. Facebook Avatar / URL

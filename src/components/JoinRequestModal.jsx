@@ -22,6 +22,7 @@ export const JoinRequestModal = () => {
   // Form state
   const [facebookName, setFacebookName] = useState('');
   const [facebookUrl, setFacebookUrl] = useState('');
+  const [avatar, setAvatar] = useState('');
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
@@ -52,6 +53,7 @@ export const JoinRequestModal = () => {
     setPasscodeError('');
     setFacebookName('');
     setFacebookUrl('');
+    setAvatar('');
     setNote('');
     setFormError('');
     setIsOpen(true);
@@ -84,7 +86,13 @@ export const JoinRequestModal = () => {
     setFormError('');
     setSubmitting(true);
     try {
-      await submitJoinRequest({ facebookName: facebookName.trim(), facebookUrl: facebookUrl.trim(), note: note.trim() });
+      await submitJoinRequest({
+        facebookName: facebookName.trim(),
+        facebookUrl: facebookUrl.trim(),
+        imageUrl: avatar.trim(),
+        avatar: avatar.trim(),
+        note: note.trim()
+      });
       setSubmitting(false);
       setStep('success');
     } catch {
@@ -298,6 +306,80 @@ export const JoinRequestModal = () => {
                 />
               </div>
 
+              {/* Avatar Photo */}
+              <div>
+                <label style={labelStyle}>รูปโปรไฟล์ (ไม่บังคับ)</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {avatar && (
+                    <div style={{ width: '44px', height: '44px', borderRadius: '10px', overflow: 'hidden', border: '1.5px solid #38bdf8', flexShrink: 0 }}>
+                      <img src={avatar} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                  )}
+                  <label style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '9px 14px',
+                    background: 'rgba(56,189,248,0.12)',
+                    border: '1px solid rgba(56,189,248,0.35)',
+                    borderRadius: '10px',
+                    color: '#38bdf8',
+                    fontSize: '12px',
+                    fontWeight: '700',
+                    cursor: 'pointer'
+                  }}>
+                    📷 {avatar ? 'เปลี่ยนรูปภาพ' : 'เลือกรูปจากเครื่อง / มือถือ'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={e => {
+                        const file = e.target.files && e.target.files[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = ev => {
+                          const img = new Image();
+                          img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const maxDim = 320;
+                            let width = img.width;
+                            let height = img.height;
+                            if (width > height) {
+                              if (width > maxDim) {
+                                height = Math.round((height * maxDim) / width);
+                                width = maxDim;
+                              }
+                            } else {
+                              if (height > maxDim) {
+                                width = Math.round((width * maxDim) / height);
+                                height = maxDim;
+                              }
+                            }
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            setAvatar(canvas.toDataURL('image/jpeg', 0.85));
+                          };
+                          img.src = ev.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                        e.target.value = '';
+                      }}
+                    />
+                  </label>
+                  {avatar && (
+                    <button
+                      type="button"
+                      onClick={() => setAvatar('')}
+                      style={{ background: 'transparent', border: 'none', color: '#ef4444', fontSize: '11px', cursor: 'pointer', fontWeight: '700' }}
+                    >
+                      ลบรูป
+                    </button>
+                  )}
+                </div>
+              </div>
+
               <div>
                 <label style={labelStyle}>หมายเหตุ (ไม่บังคับ)</label>
                 <textarea
@@ -402,7 +484,7 @@ export const JoinRequestModal = () => {
             </h2>
             <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, fontFamily: "'Inter', sans-serif", margin: '0 0 28px' }}>
               แอดมินจะตรวจสอบข้อมูลของคุณและยืนยันคำขอในเร็วๆ นี้<br />
-              ขอบคุณที่สนใจเข้าร่วม <strong style={{ color: '#ffd700' }}>SAMEWEKNOW</strong>!
+              ขอบคุณที่สนใจเข้าร่วม <strong style={{ color: '#38bdf8' }}>DIFFSNOW</strong>!
             </p>
             <button
               onClick={handleClose}

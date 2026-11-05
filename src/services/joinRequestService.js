@@ -46,6 +46,7 @@ const _saveAll = (requests) => {
 
 // Submit a new join request from public page
 export const submitJoinRequest = async (data) => {
+  const avatarUrl = data.imageUrl || data.avatar || '';
   const newRequest = {
     id: `req-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     status: 'pending',         // 'pending' | 'accepted' | 'rejected'
@@ -54,6 +55,8 @@ export const submitJoinRequest = async (data) => {
     name: data.facebookName || '',
     facebookName: data.facebookName || '',
     facebookUrl: data.facebookUrl || '',
+    imageUrl: avatarUrl,
+    avatar: avatarUrl,
     note: data.note || '',
     rejectedReason: ''
   };
@@ -97,8 +100,8 @@ export const acceptJoinRequest = async (requestId, rankOrder = '4', customRole =
     facebook: req.facebookUrl || '',
     socialLink: req.facebookUrl || '',
     social: req.facebookUrl || '',
-    avatar: '/asset/LOGO DIFFSNOW.png',
-    imageUrl: '/asset/LOGO DIFFSNOW.png',
+    avatar: req.imageUrl || req.avatar || '/asset/LOGO DIFFSNOW.png',
+    imageUrl: req.imageUrl || req.avatar || '/asset/LOGO DIFFSNOW.png',
     facebookName: req.facebookName || req.name || '',
     fromRequest: requestId,
     joinedAt: new Date().toISOString()

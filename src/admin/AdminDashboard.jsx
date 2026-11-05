@@ -285,6 +285,8 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
   const [memberSearch, setMemberSearch] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [fetchingKick, setFetchingKick] = useState(false);
+  const [acceptAvatar, setAcceptAvatar] = useState('');
   const [form, setForm] = useState({
     name: '',
     role: 'Founder',
@@ -352,6 +354,7 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     setAcceptTarget(req);
     setAcceptRank('4');
     setAcceptCustomRole('Member');
+    setAcceptAvatar(req.imageUrl || req.avatar || '');
     setShowAcceptModal(true);
   };
 
@@ -359,10 +362,9 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     if (!acceptTarget) return;
     const newMember = await acceptJoinRequest(acceptTarget.id, acceptRank, acceptCustomRole);
     if (newMember) {
-      if (!newMember.imageUrl && !newMember.avatar) {
-        newMember.imageUrl = logoImg;
-        newMember.avatar = logoImg;
-      }
+      const chosenAvatar = acceptAvatar || newMember.imageUrl || newMember.avatar || logoImg;
+      newMember.imageUrl = chosenAvatar;
+      newMember.avatar = chosenAvatar;
       let currentList = rosterData['members'] || [];
       try {
         const freshList = await fetchRosterEntries();
@@ -379,6 +381,7 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     }
     setShowAcceptModal(false);
     setAcceptTarget(null);
+    setAcceptAvatar('');
   };
 
   const handleOpenRejectModal = (req) => {
@@ -657,14 +660,77 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     setShowAddModal(true);
   };
 
+  const handleUploadAvatarFile = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 320;
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          }
+        } else {
+          if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        setForm(prev => ({ ...prev, imageUrl: dataUrl }));
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleFetchKickAvatar = async () => {
+    if (!form.kick) return;
+    setFetchingKick(true);
+    try {
+      const channel = form.kick.trim().replace(/^https?:\/\/(www\.)?kick\.com\//i, '').replace(/^@/, '').replace(/[/?#].*$/, '');
+      if (channel) {
+        const res = await fetch(`https://kick.com/api/v2/channels/${encodeURIComponent(channel)}`);
+        if (res.ok) {
+          const data = await res.json();
+          const pic = data?.user?.profile_pic;
+          if (pic) {
+            setForm(prev => ({ ...prev, imageUrl: pic }));
+          } else {
+            alert('ไม่พบรูปโปรไฟล์ในช่อง Kick นี้');
+          }
+        } else {
+          alert('ไม่สามารถดึงรูปจาก Kick ได้');
+        }
+      }
+    } catch {
+      alert('เกิดข้อผิดพลาดในการดึงรูปจาก Kick');
+    } finally {
+      setFetchingKick(false);
+    }
+  };
+
   const openEdit = (item) => {
     setEditingItem(item);
     const ro = String(item.rankOrder !== undefined ? (Number(item.rankOrder) >= 4 ? '4' : item.rankOrder) : getRankNumber(item));
+    const rawImg = (item.imageUrl || item.avatar || '').trim();
+    const isDefault = !rawImg || rawImg.includes('LOGO DIFFSNOW') || rawImg.includes('LOGO_NO.BK_Sameweknow') || rawImg.includes('LOGO%20DIFFSNOW');
     setForm({
       name: item.name || item.username || '',
       role: item.role || item.status || getRoleName(item),
       rankOrder: ro || '4',
-      imageUrl: item.imageUrl || item.avatar || '',
+      imageUrl: isDefault ? '' : rawImg,
       socialLink: item.socialLink || item.social || '',
       facebook: item.facebook || '',
       instagram: item.instagram || '',
@@ -690,14 +756,16 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     const roleMap = { '1': 'Head', '2': 'Leader', '3': 'Supporter', '4': 'Member' };
     const roleName = form.role?.trim() || roleMap[rankNum] || 'Member';
 
+    const finalImg = form.imageUrl.trim() || logoImg;
+
     const payload = {
       id: editingItem ? editingItem.id : Date.now(),
       name: memberName,
       username: memberName,
       role: roleName,
       rankOrder: rankNum,
-      avatar: form.imageUrl.trim() || logoImg,
-      imageUrl: form.imageUrl.trim() || logoImg,
+      avatar: finalImg,
+      imageUrl: finalImg,
       socialLink: primarySocial,
       facebook: fb,
       instagram: ig,
@@ -1434,13 +1502,24 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
                       const name = item.name || item.username || 'Unknown';
                       const role = getRoleName(item);
                       const rankNum = getRankNumber(item);
-                      const avatarSrc = item.imageUrl || item.avatar || logoImg;
+                      const rawAvatar = (item.imageUrl || item.avatar || '').trim();
+                      const isDefault = !rawAvatar || rawAvatar.includes('LOGO DIFFSNOW') || rawAvatar.includes('LOGO_NO.BK_Sameweknow') || rawAvatar.includes('LOGO%20DIFFSNOW');
+                      const avatarSrc = isDefault ? logoImg : rawAvatar;
 
                       return (
                         <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                           <td style={{ padding: '12px 16px' }}>
-                            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                              <img src={avatarSrc} alt={name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={e => e.target.src = logoImg} />
+                            <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', border: isDefault ? '1px solid rgba(255,255,255,0.1)' : '1.5px solid rgba(56,189,248,0.4)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: isDefault ? 'none' : '0 2px 8px rgba(56,189,248,0.2)' }}>
+                              <img
+                                src={avatarSrc}
+                                alt={name}
+                                style={{ width: '100%', height: '100%', objectFit: isDefault ? 'contain' : 'cover' }}
+                                onError={e => {
+                                  if (e.target.src !== logoImg) {
+                                    e.target.src = logoImg;
+                                  }
+                                }}
+                              />
                             </div>
                           </td>
 
@@ -2778,17 +2857,105 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
                 </div>
               </div>
 
-              {/* 9. DIRECT IMAGE URL */}
-              <div>
-                <label style={{ fontSize: '10px', fontWeight: '800', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', display: 'block', marginBottom: '6px' }}>
-                  DIRECT IMAGE URL (ไม่ใส่ก็ได้ ระบบจะดึงรูปจาก FB/IG/TIKTOK ให้อัตโนมัติ)
+              {/* 9. AVATAR / PROFILE PHOTO */}
+              <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(56,189,248,0.25)', borderRadius: '14px', padding: '14px' }}>
+                <label style={{ fontSize: '11px', fontWeight: '800', color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '10px' }}>
+                  รูปโปรไฟล์สมาชิก (Avatar Photo)
                 </label>
-                <input
-                  value={form.imageUrl}
-                  onChange={e => setForm({ ...form, imageUrl: e.target.value })}
-                  placeholder="https://... (Direct Image URL)"
-                  style={INPUT}
-                />
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                  <div style={{ width: '60px', height: '60px', borderRadius: '12px', background: 'rgba(0,0,0,0.5)', border: '1.5px solid rgba(56,189,248,0.5)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 15px rgba(0,0,0,0.6)' }}>
+                    <img
+                      src={form.imageUrl || logoImg}
+                      alt="Avatar Preview"
+                      style={{ width: '100%', height: '100%', objectFit: (form.imageUrl && form.imageUrl !== logoImg) ? 'cover' : 'contain' }}
+                      onError={e => { e.target.src = logoImg; }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, minWidth: '180px' }}>
+                    <label style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      padding: '9px 14px',
+                      background: 'linear-gradient(135deg, rgba(56,189,248,0.2) 0%, rgba(2,132,199,0.3) 100%)',
+                      border: '1px solid #38bdf8',
+                      borderRadius: '10px',
+                      color: '#38bdf8',
+                      fontSize: '12px',
+                      fontWeight: '800',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0 2px 10px rgba(56,189,248,0.2)'
+                    }}>
+                      📁 เลือกรูปจากเครื่อง / มือถือ
+                      <input
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={handleUploadAvatarFile}
+                      />
+                    </label>
+
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {form.kick && (
+                        <button
+                          type="button"
+                          onClick={handleFetchKickAvatar}
+                          disabled={fetchingKick}
+                          style={{
+                            padding: '5px 10px',
+                            background: 'rgba(83,252,24,0.15)',
+                            border: '1px solid rgba(83,252,24,0.4)',
+                            borderRadius: '8px',
+                            color: '#53fc18',
+                            fontSize: '11px',
+                            fontWeight: '700',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {fetchingKick ? 'กำลังดึง...' : '⚡ ดึงรูปจาก Kick'}
+                        </button>
+                      )}
+
+                      {form.imageUrl && form.imageUrl !== logoImg && (
+                        <button
+                          type="button"
+                          onClick={() => setForm(prev => ({ ...prev, imageUrl: '' }))}
+                          style={{
+                            padding: '5px 10px',
+                            background: 'rgba(239,68,68,0.15)',
+                            border: '1px solid rgba(239,68,68,0.3)',
+                            borderRadius: '8px',
+                            color: '#ef4444',
+                            fontSize: '11px',
+                            fontWeight: '700',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          ✕ ลบรูป (ใช้โลโก้)
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginBottom: '4px', fontWeight: '700' }}>
+                    หรือใส่ Direct Image URL:
+                  </div>
+                  <input
+                    value={form.imageUrl}
+                    onChange={e => setForm({ ...form, imageUrl: e.target.value })}
+                    placeholder="https://... (ลิงก์รูปตรง เช่น .png, .jpg, Imgur, Discord)"
+                    style={{ ...INPUT, fontSize: '12px', padding: '9px 12px' }}
+                  />
+                  <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)', marginTop: '4px', lineHeight: 1.4 }}>
+                    * สามารถกดปุ่ม <strong>"เลือกรูปจากเครื่อง / มือถือ"</strong> เพื่อเลือกไฟล์รูปได้เลย ไม่ต้องฝากรูปที่อื่น (ลิงก์หน้าโปรไฟล์ Facebook ทั่วไปไม่ใช่ไฟล์รูป จึงไม่สามารถนำมาใส่ในช่องนี้ได้)
+                  </div>
+                </div>
               </div>
 
               {/* 10. ลำดับยศคำแนะนำ */}
@@ -2901,6 +3068,76 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
                   placeholder="เช่น Member, Supporter..."
                   style={INPUT}
                 />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '6px' }}>
+                  รูปโปรไฟล์ (Avatar Photo)
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(56,189,248,0.3)', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <img src={acceptAvatar || logoImg} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: acceptAvatar ? 'cover' : 'contain' }} onError={e => e.target.src = logoImg} />
+                  </div>
+                  <label style={{
+                    padding: '8px 14px',
+                    background: 'rgba(56,189,248,0.15)',
+                    border: '1px solid rgba(56,189,248,0.35)',
+                    borderRadius: '8px',
+                    color: '#38bdf8',
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    cursor: 'pointer'
+                  }}>
+                    📁 เลือกรูปจากเครื่อง
+                    <input
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={e => {
+                        const file = e.target.files && e.target.files[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = ev => {
+                          const img = new Image();
+                          img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const maxDim = 320;
+                            let width = img.width;
+                            let height = img.height;
+                            if (width > height) {
+                              if (width > maxDim) {
+                                height = Math.round((height * maxDim) / width);
+                                width = maxDim;
+                              }
+                            } else {
+                              if (height > maxDim) {
+                                width = Math.round((width * maxDim) / height);
+                                height = maxDim;
+                              }
+                            }
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            setAcceptAvatar(canvas.toDataURL('image/jpeg', 0.85));
+                          };
+                          img.src = ev.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                        e.target.value = '';
+                      }}
+                    />
+                  </label>
+                  {acceptAvatar && (
+                    <button
+                      type="button"
+                      onClick={() => setAcceptAvatar('')}
+                      style={{ padding: '6px 10px', background: 'transparent', border: 'none', color: '#ef4444', fontSize: '11px', cursor: 'pointer' }}
+                    >
+                      ลบรูป
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
