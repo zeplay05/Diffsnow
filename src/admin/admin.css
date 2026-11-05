@@ -1332,15 +1332,20 @@
 
   .admin-mobile-header {
     display: flex !important;
-    align-items: center;
-    justify-content: space-between;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 56px !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     padding: 0 16px !important;
     background: #09090b !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-    flex-shrink: 0;
-    height: 56px !important;
-    box-sizing: border-box;
-    z-index: 100;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+    z-index: 1000 !important;
   }
 
   /* Floating Modal-Style Sidebar Drawer matching Screenshot 2 */
@@ -1467,13 +1472,13 @@
   }
 
   .admin-main {
-    height: calc(100vh - 56px) !important;
-    height: calc(100dvh - 56px) !important;
-    padding: 16px 14px 44px !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    padding: 72px 14px 44px !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
-    box-sizing: border-box;
+    box-sizing: border-box !important;
   }
 
   /* Hero Banner matching Screenshot 1 */
@@ -1656,11 +1661,11 @@
 
 @media (max-width: 600px) {
   .admin-mobile-header {
-    padding: 0 12px !important;
-    height: 52px !important;
+    height: 56px !important;
+    padding: 0 14px !important;
   }
   .admin-main {
-    padding: 12px 10px 48px !important;
+    padding: 70px 10px 48px !important;
   }
   .admin-login-wrapper {
     padding: 16px 12px !important;

@@ -217,6 +217,18 @@ function SectionHeader({ icon, title, iconColor, iconBg }) {
 export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData }) {
   const [tab, setTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth <= 900;
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 900);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const selectTab = (t) => {
     setTab(t);
@@ -833,20 +845,58 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
         />
       )}
 
-      {/* ── MOBILE HEADER ──────────────────────────────────────────────────── */}
-      <header className="admin-mobile-header">
+      {/* ── MOBILE HEADER (Top Bar with ☰ Hamburger Icon) ─────────────────── */}
+      <header
+        className="admin-mobile-header"
+        style={{
+          position: isMobile ? 'fixed' : undefined,
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '56px',
+          background: '#09090b',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          display: isMobile ? 'flex' : undefined,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 16px',
+          zIndex: 1000,
+          boxSizing: 'border-box',
+        }}
+      >
         <button 
+          type="button"
           onClick={() => setSidebarOpen(true)} 
           aria-label="เปิดเมนู"
-          style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '6px' }}
+          className="admin-hamburger-btn"
+          style={{
+            background: 'rgba(255, 255, 255, 0.06)',
+            border: '1px solid rgba(255, 255, 255, 0.14)',
+            borderRadius: '10px',
+            color: '#ffffff',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '38px',
+            height: '38px',
+            padding: 0,
+            flexShrink: 0
+          }}
         >
-          <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+          <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+            <line x1="4" y1="6" x2="20" y2="6" strokeLinecap="round" />
+            <line x1="4" y1="12" x2="20" y2="12" strokeLinecap="round" />
+            <line x1="4" y1="18" x2="20" y2="18" strokeLinecap="round" />
+          </svg>
         </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <img src={logoImg} alt={gangName} style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
-          <span style={{ fontWeight: 800, fontSize: '14px', letterSpacing: '0.1em' }}>{gangName}</span>
+          <span style={{ fontWeight: 800, fontSize: '15px', letterSpacing: '0.12em', color: '#ffffff', textTransform: 'uppercase' }}>
+            {gangName}
+          </span>
         </div>
-        <div style={{ width: '34px' }} />
+        <div style={{ width: '38px' }} />
       </header>
 
       {/* ── SIDEBAR ────────────────────────────────────────────────────────── */}
@@ -1001,7 +1051,7 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
         flex: 1,
         height: '100vh',
         overflowY: 'auto',
-        padding: '32px 28px',
+        padding: isMobile ? '70px 14px 44px' : '32px 28px',
         boxSizing: 'border-box'
       }}>
 
