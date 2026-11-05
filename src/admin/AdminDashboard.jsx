@@ -2832,7 +2832,7 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
         <div onClick={() => setShowAcceptModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '14px' }}>
           <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: '440px', background: '#0e0e12', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '20px', padding: '28px', boxSizing: 'border-box' }}>
             <h3 style={{ margin: '0 0 6px 0', fontSize: '17px', fontWeight: '800', color: '#fff' }}>
-              รับเข้าแก๊ง {gangName}
+              รับเข้าตระกูล {gangName}
             </h3>
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', margin: '0 0 18px 0' }}>
               ผู้ขอเข้าร่วม: <strong style={{ color: '#fff' }}>{acceptTarget.facebookName || acceptTarget.name}</strong>
