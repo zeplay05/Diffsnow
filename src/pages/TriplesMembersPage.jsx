@@ -78,16 +78,16 @@ export const TriplesMembersPage = ({ entries, onBack, onSaveProfile, centerLogoU
     }}>
 
       {/* Back Button (top-right) */}
-      <div style={{ position: 'absolute', top: '32px', right: '32px', zIndex: 100 }}>
+      <div style={{ position: 'absolute', top: 'clamp(14px, 3vh, 32px)', right: 'clamp(14px, 3vw, 32px)', zIndex: 100 }}>
         <button
           onClick={onBack}
           style={{
-            padding: '9px 22px',
+            padding: 'clamp(7px, 1.2vh, 9px) clamp(14px, 2vw, 22px)',
             borderRadius: '12px',
-            background: 'rgba(8,22,42,0.75)',
+            background: 'rgba(8,22,42,0.82)',
             border: '1px solid rgba(56,189,248,0.3)',
             color: 'rgba(186,230,253,0.85)',
-            fontSize: '11px',
+            fontSize: 'clamp(10px, 1.1vw, 11px)',
             fontWeight: '800',
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
@@ -163,15 +163,15 @@ export const TriplesMembersPage = ({ entries, onBack, onSaveProfile, centerLogoU
         </div>
 
         {/* Logo */}
-        <div style={{ display: 'flex', justifyContent: 'center', margin: '24px 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', margin: 'clamp(14px, 3vh, 24px) 0' }}>
           <img
             src={logoSrc}
             alt="DIFFSNOW Logo"
             style={{
-              width: '240px',
-              height: '240px',
-              maxWidth: '80vw',
-              maxHeight: '240px',
+              width: 'clamp(160px, 36vw, 240px)',
+              height: 'clamp(160px, 36vw, 240px)',
+              maxWidth: 'min(240px, 75vw)',
+              maxHeight: 'clamp(160px, 28vh, 240px)',
               objectFit: 'contain',
               filter: 'drop-shadow(0 0 25px rgba(56,189,248,0.4))',
               transition: 'transform 0.4s',
@@ -302,8 +302,8 @@ export const TriplesMembersPage = ({ entries, onBack, onSaveProfile, centerLogoU
                 {/* Member Cards Grid */}
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                  gap: '16px',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))',
+                  gap: 'clamp(12px, 2vw, 16px)',
                 }}>
                   {mems.map(m => (
                     <MemberCard key={m.id || m.robloxId || m.username} m={m} rank={rank} cfg={cfg} onManageProfile={setProfileMember} />

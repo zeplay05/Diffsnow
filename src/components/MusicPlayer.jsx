@@ -1502,8 +1502,9 @@ export const MusicPlayer = ({ isPreview = false, previewLayout, previewUrl, prev
   return (
     <div style={isPreview ? { display: 'flex', alignItems: 'center', justifyContent: 'center' } : {
       position: 'fixed',
-      bottom: '30px',
-      right: '30px',
+      bottom: 'clamp(16px, 2.5vh, 30px)',
+      right: 'clamp(12px, 2.5vw, 30px)',
+      maxWidth: 'calc(100vw - 24px)',
       zIndex: 1000,
       fontFamily: 'var(--font-inter)'
     }}>

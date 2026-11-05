@@ -82,11 +82,13 @@ export function MemberProfileModal({ member, onClose, onSave }) {
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
-          maxWidth: '440px',
+          maxWidth: 'min(440px, 94vw)',
+          maxHeight: 'calc(100vh - 28px)',
+          overflowY: 'auto',
           background: 'linear-gradient(165deg, #0e1726 0%, #070c16 100%)',
           border: '1px solid rgba(56, 189, 248, 0.4)',
-          borderRadius: '20px',
-          padding: '28px',
+          borderRadius: 'clamp(16px, 3vw, 20px)',
+          padding: 'clamp(18px, 4vw, 28px)',
           boxShadow: '0 25px 70px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.15)',
           position: 'relative',
         }}

@@ -240,6 +240,28 @@
   transform: translateY(0) scale(0.98);
 }
 
+@media (max-width: 600px) {
+  .center-main-btn {
+    width: min(330px, 92vw);
+    height: 60px;
+    min-height: 60px;
+    font-size: 17px;
+    padding: 0 20px;
+    letter-spacing: 0.2em;
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 380px) {
+  .center-main-btn {
+    width: 290px;
+    height: 54px;
+    min-height: 54px;
+    font-size: 15px;
+    letter-spacing: 0.16em;
+  }
+}
+
 /* ==========================================================================
    Bottom Bar (Centered Footer)
    ========================================================================== */

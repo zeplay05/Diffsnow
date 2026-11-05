@@ -71,10 +71,10 @@ export const PublicRosterPage = ({ entries, onNavigateToAdmin, onNavigateToTripl
                 visibility: 'hidden',
                 fontWeight: '900',
                 textTransform: 'uppercase',
-                letterSpacing: '0.25em',
+                letterSpacing: 'clamp(0.12em, 1.8vw, 0.25em)',
                 color: '#ffffff',
                 lineHeight: 1.1,
-                fontSize: 'clamp(2.2rem, 5.5vw, 4.8rem)',
+                fontSize: 'clamp(1.75rem, 6.5vw, 4.4rem)',
                 whiteSpace: 'nowrap',
                 padding: '0 4px',
                 margin: 0,
@@ -91,10 +91,10 @@ export const PublicRosterPage = ({ entries, onNavigateToAdmin, onNavigateToTripl
                   left: 0,
                   fontWeight: '900',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.25em',
+                  letterSpacing: 'clamp(0.12em, 1.8vw, 0.25em)',
                   color: '#ffffff',
                   lineHeight: 1.1,
-                  fontSize: 'clamp(2.2rem, 5.5vw, 4.8rem)',
+                  fontSize: 'clamp(1.75rem, 6.5vw, 4.4rem)',
                   whiteSpace: 'nowrap',
                   padding: '0 4px',
                   margin: 0,
@@ -111,9 +111,9 @@ export const PublicRosterPage = ({ entries, onNavigateToAdmin, onNavigateToTripl
             marginTop: '8px',
             color: accent,
             textTransform: 'uppercase',
-            letterSpacing: '0.4em',
+            letterSpacing: 'clamp(0.18em, 1.8vw, 0.36em)',
             fontWeight: '700',
-            fontSize: 'clamp(10px, 1.4vw, 14px)',
+            fontSize: 'clamp(9.5px, 1.3vw, 13.5px)',
             filter: `drop-shadow(0 0 16px ${withAlpha(accent, 0.6)})`,
             fontFamily: 'var(--font-chakra-petch)'
           }}>
@@ -131,7 +131,7 @@ export const PublicRosterPage = ({ entries, onNavigateToAdmin, onNavigateToTripl
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            margin: 'clamp(10px, 2vh, 20px) auto',
+            margin: 'clamp(8px, 1.8vh, 18px) auto',
             userSelect: 'none'
           }}
         >
@@ -140,10 +140,10 @@ export const PublicRosterPage = ({ entries, onNavigateToAdmin, onNavigateToTripl
             alt="DIFFSNOW LOGO" 
             className="center-hero-logo"
             style={{
-              width: '240px',
-              height: '240px',
-              maxWidth: '80vw',
-              maxHeight: '240px',
+              width: 'clamp(170px, 38vw, 240px)',
+              height: 'clamp(170px, 38vw, 240px)',
+              maxWidth: 'min(240px, 75vw)',
+              maxHeight: 'clamp(170px, 28vh, 240px)',
               objectFit: 'contain',
               filter: `drop-shadow(0 0 20px ${withAlpha(accent, 0.65)}) drop-shadow(0 0 45px ${withAlpha(accent, 0.4)}) drop-shadow(0 10px 25px rgba(0, 0, 0, 0.85))`,
               transition: 'transform 0.4s ease, filter 0.4s ease'
@@ -164,7 +164,7 @@ export const PublicRosterPage = ({ entries, onNavigateToAdmin, onNavigateToTripl
             onClick={onNavigateToTriples}
             className="center-main-btn"
             style={{
-              margin: '0 0 clamp(76px, 9.2vh, 110px) 0',
+              margin: '0 0 clamp(48px, 8.5vh, 100px) 0',
               cursor: 'pointer'
             }}
           >

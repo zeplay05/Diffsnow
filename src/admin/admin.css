@@ -1363,9 +1363,9 @@
     bottom: auto !important;
     width: 100% !important;
     max-width: 100% !important;
-    height: 50vh !important;
-    height: 50dvh !important;
-    max-height: 52dvh !important;
+    height: auto !important;
+    max-height: 84vh !important;
+    max-height: 84dvh !important;
     background: rgba(12, 12, 16, 0.98) !important;
     backdrop-filter: blur(30px) !important;
     -webkit-backdrop-filter: blur(30px) !important;
@@ -1542,5 +1542,42 @@
     justify-content: center !important;
     padding: 9px 8px !important;
     font-size: 12px !important;
+  }
+}
+
+/* Enhanced Responsive Polish across all device sizes */
+@media (max-width: 900px) {
+  .admin-header-title {
+    font-size: 19px !important;
+  }
+  .admin-card-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-mobile-header {
+    padding: 0 12px !important;
+    height: 52px !important;
+  }
+  .admin-main {
+    padding: 12px 10px 48px !important;
+  }
+  .admin-login-wrapper {
+    padding: 16px 12px !important;
+  }
+  .admin-login-card {
+    padding: 26px 16px 20px !important;
+    border-radius: 18px !important;
+  }
+  .admin-input-field {
+    height: 44px !important;
+    font-size: 13px !important;
+  }
+  .admin-submit-btn {
+    height: 44px !important;
+    font-size: 13.5px !important;
   }
 }

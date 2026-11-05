@@ -138,12 +138,14 @@ export const JoinRequestModal = () => {
         onClick={e => e.stopPropagation()}
         style={{
           width: '100%',
-          maxWidth: '460px',
+          maxWidth: 'min(460px, 94vw)',
+          maxHeight: 'calc(100vh - 30px)',
+          overflowY: 'auto',
           background: 'linear-gradient(135deg, rgba(15,15,20,0.98) 0%, rgba(10,10,15,0.98) 100%)',
           border: '1px solid rgba(100, 160, 255, 0.25)',
-          borderRadius: '24px',
+          borderRadius: 'clamp(18px, 3.5vw, 24px)',
           boxShadow: '0 30px 80px rgba(0,0,0,0.9), 0 0 60px rgba(100,160,255,0.08)',
-          padding: '32px',
+          padding: 'clamp(20px, 4.5vw, 32px)',
           position: 'relative',
           animation: 'fadeInUp 0.25s ease'
         }}
@@ -448,20 +450,20 @@ export const JoinRequestModal = () => {
         onMouseLeave={() => setBtnHover(false)}
         style={{
           position: 'fixed',
-          top: '24px',
-          right: '24px',
+          top: 'clamp(14px, 2.5vh, 24px)',
+          right: 'clamp(14px, 2.5vw, 24px)',
           zIndex: 1000,
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          padding: '10px 20px',
+          padding: 'clamp(7px, 1.2vh, 10px) clamp(13px, 2vw, 20px)',
           background: btnHover
             ? 'linear-gradient(135deg, rgba(60,90,180,0.95), rgba(40,60,150,0.95))'
             : 'linear-gradient(135deg, rgba(30,50,140,0.85), rgba(20,40,120,0.85))',
           border: `1px solid ${btnHover ? 'rgba(100,160,255,0.6)' : 'rgba(100,160,255,0.35)'}`,
           borderRadius: '50px',
           color: '#ffffff',
-          fontSize: '12px',
+          fontSize: 'clamp(10.5px, 1.1vw, 12px)',
           fontWeight: '800',
           letterSpacing: '0.12em',
           cursor: 'pointer',

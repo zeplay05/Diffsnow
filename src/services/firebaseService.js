@@ -42,9 +42,11 @@ export const saveCenterLogoUrl = (url) => {
   localStorage.setItem(LOGO_URL_KEY, url);
 };
 
+export const DEFAULT_FIREBASE_URL = 'https://diffsnow-database-default-rtdb.asia-southeast1.firebasedatabase.app';
+
 export const getFirebaseConfig = () => {
   const defaults = {
-    dbUrl: '',
+    dbUrl: DEFAULT_FIREBASE_URL,
     secretToken: ''
   };
 
@@ -54,7 +56,7 @@ export const getFirebaseConfig = () => {
 
     const parsed = JSON.parse(saved);
     return {
-      dbUrl: parsed.dbUrl || '',
+      dbUrl: parsed.dbUrl || DEFAULT_FIREBASE_URL,
       secretToken: parsed.secretToken || ''
     };
   } catch (e) {

@@ -265,14 +265,11 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite }) {
   const [gangSlug, setGangSlug] = useState(() => localStorage.getItem('triples_gang_slug') || 'Diffsnow');
   const [showLandingPage, setShowLandingPage] = useState(() => localStorage.getItem('triples_show_landing') !== 'false');
 
-  // Firebase Realtime Database State (แทนที่ Supabase)
+  // Firebase Realtime Database State
   const [fbUrl, setFbUrl] = useState(() => {
     const saved = localStorage.getItem('triples_fb_url') || localStorage.getItem('diffsnow_fb_url') || '';
-    if (saved.includes('sameweknow-db-20260821')) {
-      localStorage.removeItem('triples_fb_url');
-      localStorage.removeItem('diffsnow_fb_url');
-      localStorage.removeItem('diffsnow_firebase_config');
-      return '';
+    if (saved.includes('sameweknow-db-20260821') || !saved.trim()) {
+      return 'https://diffsnow-database-default-rtdb.asia-southeast1.firebasedatabase.app';
     }
     return saved;
   });
