@@ -158,7 +158,7 @@ export const fetchRosterEntries = async () => {
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
-        if (data) {
+        if (data !== undefined && data !== null) {
           let list = [];
           if (Array.isArray(data)) {
             list = data.filter(Boolean);
@@ -172,10 +172,8 @@ export const fetchRosterEntries = async () => {
             }
           }
           
-          if (list.length > 0) {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
-            return list;
-          }
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
+          return list;
         }
       }
     } catch (err) {
@@ -260,13 +258,13 @@ export const saveRosterEntry = async (entry) => {
   // Sync to Firebase Realtime Database
   if (config.dbUrl && config.dbUrl.trim() !== '') {
     try {
-      let url = `${config.dbUrl.replace(/\/$/, '')}/roster/${entryId}.json`;
+      let url = `${config.dbUrl.replace(/\/$/, '')}/roster.json`;
       if (config.secretToken) url += `?auth=${config.secretToken}`;
       
       await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedEntry)
+        body: JSON.stringify(newList)
       });
     } catch (err) {
       console.error('Firebase save failed:', err);
@@ -279,16 +277,20 @@ export const saveRosterEntry = async (entry) => {
 // Delete Entry
 export const deleteRosterEntry = async (id) => {
   const current = await fetchRosterEntries();
-  const newList = current.filter(item => item.id !== id);
+  const newList = current.filter(item => String(item.id) !== String(id) && item.name !== id);
   
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newList));
 
   const config = getFirebaseConfig();
   if (config.dbUrl && config.dbUrl.trim() !== '') {
     try {
-      let url = `${config.dbUrl.replace(/\/$/, '')}/roster/${id}.json`;
+      let url = `${config.dbUrl.replace(/\/$/, '')}/roster.json`;
       if (config.secretToken) url += `?auth=${config.secretToken}`;
-      await fetch(url, { method: 'DELETE' });
+      await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newList)
+      });
     } catch (err) {
       console.error('Firebase delete error:', err);
     }

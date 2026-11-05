@@ -516,10 +516,10 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
   const [partnerForm, setPartnerForm] = useState({ name: '', url: '' });
 
   // Persist members when updated
-  const saveEntries = (newEntries) => {
+  const saveEntries = async (newEntries) => {
     if (!currentRoster) return;
     setRosterData(prev => ({ ...prev, [currentRoster.id]: newEntries }));
-    saveRosterMembers(currentRoster.id, newEntries);
+    await saveRosterMembers(currentRoster.id, newEntries);
 
     // Save directly into diffsnow_roster_data & triples_members_members for public pages
     try {
@@ -530,7 +530,7 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
       console.warn('LocalStorage save error:', e);
     }
 
-    // Auto-sync to Firebase Realtime Database
+    // Auto-sync to Firebase Realtime Database with await so cloud is 100% committed
     try {
       const config = getFirebaseConfig();
       const targetDbUrl = (fbUrl && fbUrl.trim()) || config?.dbUrl;
@@ -538,11 +538,11 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
       if (targetDbUrl) {
         let endpoint = `${targetDbUrl.replace(/\/$/, '')}/roster.json`;
         if (targetToken) endpoint += `?auth=${targetToken}`;
-        fetch(endpoint, {
+        await fetch(endpoint, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newEntries)
-        }).catch(err => console.warn('Auto Firebase sync error:', err));
+        });
       }
     } catch (e) {
       console.warn('Firebase auto-push error:', e);
@@ -632,7 +632,7 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     setShowAddModal(true);
   };
 
-  const handleSaveMember = () => {
+  const handleSaveMember = async () => {
     const memberName = form.name.trim();
     if (!memberName) return;
     const fb = form.facebook.trim();
@@ -665,29 +665,29 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
 
     let updated;
     if (editingItem) {
-      updated = entries.map(e => e.id === editingItem.id ? payload : e);
+      updated = entries.map(e => String(e.id) === String(editingItem.id) ? payload : e);
     } else {
       updated = [...entries, payload];
     }
-    saveEntries(updated);
+    await saveEntries(updated);
     setShowAddModal(false);
   };
 
-  const handleDeleteMember = (id) => {
+  const handleDeleteMember = async (id) => {
     if (window.confirm('ต้องการลบรายชื่อนี้หรือไม่?')) {
-      const updated = entries.filter(e => e.id !== id);
-      saveEntries(updated);
+      const updated = entries.filter(e => String(e.id) !== String(id) && e.name !== id);
+      await saveEntries(updated);
     }
   };
 
-  const handleMoveEntry = (id, direction) => {
-    const idx = entries.findIndex(e => e.id === id);
+  const handleMoveEntry = async (id, direction) => {
+    const idx = entries.findIndex(e => String(e.id) === String(id));
     if (idx === -1) return;
     const newList = [...entries];
     const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
     if (swapIdx < 0 || swapIdx >= newList.length) return;
     [newList[idx], newList[swapIdx]] = [newList[swapIdx], newList[idx]];
-    saveEntries(newList);
+    await saveEntries(newList);
   };
 
   const handleExport = () => {
