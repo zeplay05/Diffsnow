@@ -272,16 +272,30 @@ export const TriplesMembersPage = ({ entries, onBack, onSaveProfile, centerLogoU
             if (!mems.length) return null;
             return (
               <div key={rank} style={{ marginBottom: 'clamp(3rem,8vw,6rem)' }}>
-                {/* Section Title */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '28px' }}>
+                {/* Section Title (Centered) */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 'clamp(10px, 2vw, 16px)',
+                  marginBottom: '28px',
+                  width: '100%',
+                }}>
+                  <div style={{
+                    flex: 1,
+                    maxWidth: '180px',
+                    height: '1px',
+                    background: 'linear-gradient(to left, rgba(56,189,248,0.35), transparent)'
+                  }} />
                   <h2 style={{
-                    fontSize: 'clamp(11px,2.5vw,15px)',
+                    fontSize: 'clamp(12px,2.5vw,16px)',
                     fontWeight: '700',
                     letterSpacing: '0.3em',
                     color: cfg.color,
                     textTransform: 'uppercase',
                     margin: 0,
                     filter: `drop-shadow(0 0 8px ${cfg.color})`,
+                    textAlign: 'center',
                   }}>
                     {cfg.label}
                   </h2>
@@ -296,7 +310,12 @@ export const TriplesMembersPage = ({ entries, onBack, onSaveProfile, centerLogoU
                   }}>
                     [ {mems.length} ]
                   </span>
-                  <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, rgba(56,189,248,0.35), transparent)' }} />
+                  <div style={{
+                    flex: 1,
+                    maxWidth: '180px',
+                    height: '1px',
+                    background: 'linear-gradient(to right, rgba(56,189,248,0.35), transparent)'
+                  }} />
                 </div>
 
                 {/* Member Cards Grid */}
@@ -387,8 +406,7 @@ function MemberCard({ m, onManageProfile }) {
         <div style={{ fontSize: '11px', fontWeight: '800', color: '#7dd3fc', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>
           {role}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-          <button onClick={(e) => { e.stopPropagation(); onManageProfile(m); }} style={{ display:'inline-flex', alignItems:'center', gap:'4px', background:'rgba(56,189,248,.12)', border:'1px solid rgba(56,189,248,.35)', color:'#7dd3fc', borderRadius:'7px', padding:'3px 8px', fontSize:'10px', fontWeight:800, cursor:'pointer' }}>⚙ จัดการโปรไฟล์</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           {fb && (
             <a href={formatUrl(fb)} target="_blank" rel="noopener noreferrer" style={{ color: '#38bdf8', display: 'flex', alignItems: 'center' }}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.52-.14-2.71-.14-2.72 0-4.79 1.66-4.79 4.9v2.6H7v4h3V22h4v-8.5z"/></svg>
