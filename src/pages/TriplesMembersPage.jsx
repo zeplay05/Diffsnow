@@ -408,28 +408,193 @@ function MemberCard({ m, onManageProfile }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           {fb && (
-            <a href={formatUrl(fb)} target="_blank" rel="noopener noreferrer" style={{ color: '#38bdf8', display: 'flex', alignItems: 'center' }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.52-.14-2.71-.14-2.72 0-4.79 1.66-4.79 4.9v2.6H7v4h3V22h4v-8.5z"/></svg>
+            <a
+              href={formatUrl(fb)}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook Profile"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px',
+                borderRadius: '9px',
+                background: 'rgba(56, 189, 248, 0.12)',
+                border: '1px solid rgba(56, 189, 248, 0.35)',
+                color: '#38bdf8',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(56, 189, 248, 0.22)';
+                e.currentTarget.style.borderColor = '#38bdf8';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 0 12px rgba(56, 189, 248, 0.4)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(56, 189, 248, 0.12)';
+                e.currentTarget.style.borderColor = 'rgba(56, 189, 248, 0.35)';
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.4)';
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.52-.14-2.71-.14-2.72 0-4.79 1.66-4.79 4.9v2.6H7v4h3V22h4v-8.5z"/>
+              </svg>
             </a>
           )}
           {ig && (
-            <a href={formatUrl(ig)} target="_blank" rel="noopener noreferrer" style={{ color: '#e879f9', display: 'flex', alignItems: 'center' }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            <a
+              href={formatUrl(ig)}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram Profile"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px',
+                borderRadius: '9px',
+                background: 'rgba(232, 121, 249, 0.12)',
+                border: '1px solid rgba(232, 121, 249, 0.35)',
+                color: '#e879f9',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(232, 121, 249, 0.22)';
+                e.currentTarget.style.borderColor = '#e879f9';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 0 12px rgba(232, 121, 249, 0.4)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(232, 121, 249, 0.12)';
+                e.currentTarget.style.borderColor = 'rgba(232, 121, 249, 0.35)';
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.4)';
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="2" y="2" width="20" height="20" rx="5"/>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+              </svg>
             </a>
           )}
           {tt && (
-            <a href={formatUrl(tt)} target="_blank" rel="noopener noreferrer" style={{ color: '#2dd4bf', display: 'flex', alignItems: 'center' }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.89 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.32 0 .62.06.9.15V9.41a6.3 6.3 0 0 0-.9-.07A6.33 6.33 0 0 0 3 15.67 6.33 6.33 0 0 0 9.33 22a6.33 6.33 0 0 0 6.34-6.33V8.84a8.18 8.18 0 0 0 4.79 1.52V6.9a4.85 4.85 0 0 1-.87-.21z"/></svg>
+            <a
+              href={formatUrl(tt)}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="TikTok Profile"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px',
+                borderRadius: '9px',
+                background: 'rgba(45, 212, 191, 0.12)',
+                border: '1px solid rgba(45, 212, 191, 0.35)',
+                color: '#2dd4bf',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(45, 212, 191, 0.22)';
+                e.currentTarget.style.borderColor = '#2dd4bf';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 0 12px rgba(45, 212, 191, 0.4)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(45, 212, 191, 0.12)';
+                e.currentTarget.style.borderColor = 'rgba(45, 212, 191, 0.35)';
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.4)';
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.89 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.32 0 .62.06.9.15V9.41a6.3 6.3 0 0 0-.9-.07A6.33 6.33 0 0 0 3 15.67 6.33 6.33 0 0 0 9.33 22a6.33 6.33 0 0 0 6.34-6.33V8.84a8.18 8.18 0 0 0 4.79 1.52V6.9a4.85 4.85 0 0 1-.87-.21z"/>
+              </svg>
             </a>
           )}
           {kick && (
-            <a href={formatUrl(kick)} target="_blank" rel="noopener noreferrer" style={{ color: '#53fc18', display: 'flex', alignItems: 'center' }}>
-              <KickIcon size={14} color="#53fc18" />
+            <a
+              href={formatUrl(kick)}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Kick Profile"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px',
+                borderRadius: '9px',
+                background: 'rgba(83, 252, 24, 0.12)',
+                border: '1px solid rgba(83, 252, 24, 0.35)',
+                color: '#53fc18',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(83, 252, 24, 0.22)';
+                e.currentTarget.style.borderColor = '#53fc18';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 0 12px rgba(83, 252, 24, 0.4)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(83, 252, 24, 0.12)';
+                e.currentTarget.style.borderColor = 'rgba(83, 252, 24, 0.35)';
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.4)';
+              }}
+            >
+              <KickIcon size={16} color="#53fc18" />
             </a>
           )}
           {youtube && (
-            <a href={formatUrl(youtube)} target="_blank" rel="noopener noreferrer" style={{ color: '#f87171', display: 'flex', alignItems: 'center' }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            <a
+              href={formatUrl(youtube)}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="YouTube Channel"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '32px',
+                height: '32px',
+                borderRadius: '9px',
+                background: 'rgba(248, 113, 113, 0.12)',
+                border: '1px solid rgba(248, 113, 113, 0.35)',
+                color: '#f87171',
+                textDecoration: 'none',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(248, 113, 113, 0.22)';
+                e.currentTarget.style.borderColor = '#f87171';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 0 12px rgba(248, 113, 113, 0.4)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(248, 113, 113, 0.12)';
+                e.currentTarget.style.borderColor = 'rgba(248, 113, 113, 0.35)';
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.4)';
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
             </a>
           )}
         </div>
