@@ -2015,10 +2015,10 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
               <SectionHeader icon={Icon.appearance} title="Brand Assets" iconColor="#ec4899" iconBg="rgba(236,72,153,0.12)" />
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px' }}>
                 <div>
-                  <label style={{ fontSize: '10px', fontWeight: '700', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.15em', display: 'block', marginBottom: '12px' }}>Logo URL</label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
-                    <div style={{ width: '72px', height: '72px', borderRadius: '14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', flexShrink: 0 }}>
-                      <img src={logoInput || logoImg} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '6px' }} onError={e => e.target.src = logoImg} />
+                  <label style={{ fontSize: '11px', fontWeight: '700', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.15em', display: 'block', marginBottom: '12px' }}>Logo URL</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
+                    <div style={{ width: '104px', height: '104px', borderRadius: '20px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(56,189,248,0.25)', boxShadow: '0 4px 20px rgba(0,0,0,0.5)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <img src={logoInput || logoImg} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '8px' }} onError={e => e.target.src = logoImg} />
                     </div>
                     <div style={{ flex: 1 }}>
                       <input value={logoInput} onChange={e => setLogoInput(e.target.value)} placeholder="asset/LOGO DIFFSNOW.png" style={{ ...INPUT, marginBottom: '6px' }} />
@@ -2031,9 +2031,9 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '10px', fontWeight: '700', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.15em', display: 'block', marginBottom: '12px' }}>Background URL</label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
-                    <div style={{ width: '72px', height: '72px', borderRadius: '14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden', flexShrink: 0 }}>
+                  <label style={{ fontSize: '11px', fontWeight: '700', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.15em', display: 'block', marginBottom: '12px' }}>Background URL</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
+                    <div style={{ width: '104px', height: '104px', borderRadius: '20px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 4px 20px rgba(0,0,0,0.5)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <img src={bgInput || '/asset/diffsnow-bg.png'} alt="BG" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: bgOpacity / 100 }} />
                     </div>
                     <div style={{ flex: 1 }}>
