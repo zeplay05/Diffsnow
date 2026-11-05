@@ -848,11 +848,11 @@ export const MusicPlayer = ({ isPreview = false, previewLayout, previewUrl, prev
               width: '7px',
               height: '7px',
               borderRadius: '50%',
-              background: isPlaying ? '#22c55e' : '#ef4444',
-              boxShadow: isPlaying ? '0 0 10px #22c55e, 0 0 4px #22c55e' : '0 0 10px #ef4444, 0 0 4px #ef4444',
+              background: isPlaying ? '#22c55e' : '#38bdf8',
+              boxShadow: isPlaying ? '0 0 10px #22c55e, 0 0 4px #22c55e' : '0 0 10px #38bdf8, 0 0 4px #38bdf8',
               animation: isPlaying ? 'pulseDot 2s infinite ease-in-out' : 'none'
             }} />
-            <span>{isPlaying ? 'NOW PLAYING' : 'PAUSE PLAYING'}</span>
+            <span style={{ color: '#38bdf8' }}>{isPlaying ? 'NOW PLAYING' : 'PAUSE PLAYING'}</span>
           </div>
 
           <button
@@ -1467,8 +1467,32 @@ export const MusicPlayer = ({ isPreview = false, previewLayout, previewUrl, prev
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: '9px', fontWeight: '900', color: isPlaying ? '#38bdf8' : '#ef4444', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-                {isPlaying ? '▶ NOW PLAYING' : '⏸ PAUSE PLAYING'}
+              <span style={{
+                fontSize: '9px',
+                fontWeight: '900',
+                color: '#38bdf8',
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px'
+              }}>
+                {isPlaying ? (
+                  <>
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="#38bdf8" style={{ filter: 'drop-shadow(0 0 4px #38bdf8)' }}>
+                      <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    <span>NOW PLAYING</span>
+                  </>
+                ) : (
+                  <>
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="#38bdf8" style={{ filter: 'drop-shadow(0 0 4px #38bdf8)' }}>
+                      <rect x="5" y="3" width="4.5" height="18" rx="1.5"/>
+                      <rect x="14.5" y="3" width="4.5" height="18" rx="1.5"/>
+                    </svg>
+                    <span>PAUSE PLAYING</span>
+                  </>
+                )}
               </span>
               <span style={{ fontSize: '11px', fontWeight: '700', color: '#ffffff', textTransform: 'uppercase', maxWidth: '140px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {trackTitle}

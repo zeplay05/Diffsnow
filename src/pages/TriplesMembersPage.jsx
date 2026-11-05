@@ -395,7 +395,7 @@ function MemberCard({ m, onManageProfile }) {
           borderRadius="50%"
           style={{ border: '1.5px solid rgba(56,189,248,0.4)' }}
         />
-        <div style={{ position: 'absolute', bottom: '0px', right: '0px', width: '10px', height: '10px', background: '#38bdf8', borderRadius: '50%', border: '2px solid #030712' }} />
+        <div style={{ position: 'absolute', bottom: '0px', right: '0px', width: '10px', height: '10px', background: '#22c55e', borderRadius: '50%', border: '2px solid #030712' }} />
       </div>
 
       {/* Name + Role + Social Profile Buttons */}

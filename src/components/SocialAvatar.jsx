@@ -226,7 +226,7 @@ export const SocialAvatar = ({
           <h2 style={{ fontSize: '18px', fontWeight: '900', color: '#ffffff', margin: 0, letterSpacing: '0.02em', textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>
             {memberName}
           </h2>
-          <span style={{ fontSize: '11px', fontWeight: '800', color: '#ffd700', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '2px' }}>
+          <span style={{ fontSize: '11px', fontWeight: '800', color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: '2px' }}>
             {memberRole}
           </span>
         </div>
@@ -304,13 +304,13 @@ export const SocialAvatar = ({
                     overflow: 'hidden',
                     backgroundColor: '#000',
                     border: '2.5px solid rgba(255, 255, 255, 0.9)',
-                    boxShadow: '0 8px 25px rgba(0,0,0,0.8), 0 0 15px rgba(255,215,0,0.35)',
+                    boxShadow: '0 8px 25px rgba(0,0,0,0.8), 0 0 15px rgba(56, 189, 248, 0.35)',
                     cursor: 'pointer',
                     transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'scale(1.15) translateY(-3px)';
-                    e.currentTarget.style.borderColor = '#ffd700';
+                    e.currentTarget.style.borderColor = '#38bdf8';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'scale(1)';
@@ -338,7 +338,7 @@ export const SocialAvatar = ({
             overflow: 'hidden',
             backgroundColor: '#050505',
             border: '4px solid rgba(255, 255, 255, 0.95)',
-            boxShadow: '0 25px 70px rgba(0, 0, 0, 0.95), 0 0 50px rgba(255, 215, 0, 0.25)',
+            boxShadow: '0 25px 70px rgba(0, 0, 0, 0.95), 0 0 50px rgba(56, 189, 248, 0.35)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -541,7 +541,7 @@ export const SocialAvatar = ({
               boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#ffd700';
+              e.currentTarget.style.backgroundColor = '#38bdf8';
               e.currentTarget.style.color = '#000';
               e.currentTarget.style.transform = 'scale(1.1)';
             }}
@@ -583,8 +583,8 @@ export const SocialAvatar = ({
                 height: '46px',
                 borderRadius: '50%',
                 backgroundColor: '#111115',
-                border: '1.5px solid rgba(255, 215, 0, 0.35)',
-                color: '#ffd700',
+                border: '1.5px solid rgba(56, 189, 248, 0.45)',
+                color: '#38bdf8',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -592,13 +592,13 @@ export const SocialAvatar = ({
                 boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#ffd700';
+                e.currentTarget.style.backgroundColor = '#38bdf8';
                 e.currentTarget.style.color = '#000';
                 e.currentTarget.style.transform = 'scale(1.1)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = '#111115';
-                e.currentTarget.style.color = '#ffd700';
+                e.currentTarget.style.color = '#38bdf8';
                 e.currentTarget.style.transform = 'scale(1)';
               }}
             >
@@ -637,7 +637,7 @@ export const SocialAvatar = ({
           cursor: enablePreview ? 'pointer' : 'default',
           transition: 'transform 0.25s ease, box-shadow 0.25s ease',
           transform: isHovered && enablePreview ? 'scale(1.08)' : 'scale(1)',
-          boxShadow: isHovered && enablePreview ? '0 0 15px rgba(255, 215, 0, 0.45)' : 'none',
+          boxShadow: isHovered && enablePreview ? '0 0 15px rgba(56, 189, 248, 0.45)' : 'none',
           ...style
         }}
       >
@@ -662,16 +662,16 @@ export const SocialAvatar = ({
             style={{
               position: 'absolute',
               inset: 0,
-              backgroundColor: 'rgba(0,0,0,0.35)',
+              backgroundColor: 'rgba(0,0,0,0.4)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#ffd700',
+              color: '#38bdf8',
               pointerEvents: 'none',
               animation: 'fadeIn 0.15s ease'
             }}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               <line x1="11" y1="8" x2="11" y2="14"></line>
