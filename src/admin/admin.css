@@ -1345,6 +1345,11 @@
 
   /* Floating Modal-Style Sidebar Drawer matching Screenshot 2 */
   .admin-sidebar {
+    display: none !important;
+  }
+
+  .admin-sidebar.is-open {
+    display: flex !important;
     position: fixed !important;
     top: 14px !important;
     left: 12px !important;
@@ -1361,23 +1366,13 @@
     -webkit-backdrop-filter: blur(28px) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-radius: 22px !important;
-    transform: translateY(-130%) scale(0.96) !important;
-    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
     z-index: 1050 !important;
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
     padding: 16px 16px 14px 16px !important;
-    display: flex !important;
     flex-direction: column !important;
     justify-content: space-between !important;
     box-sizing: border-box !important;
-  }
-
-  .admin-sidebar.is-open {
-    transform: translateY(0) scale(1) !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
+    animation: admin-fade-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
   }
 
   .admin-brand-profile {

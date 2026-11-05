@@ -15,7 +15,7 @@ import {
   rejectJoinRequest,
   deleteJoinRequest
 } from '../services/joinRequestService';
-import { getFirebaseConfig } from '../services/firebaseService';
+import { getFirebaseConfig, fetchRosterEntries } from '../services/firebaseService';
 import './admin.css';
 
 // ─── Icons (inline SVG) ───────────────────────────────────────────────────────
@@ -232,6 +232,13 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
   useEffect(() => {
     fetchAllMembers().then((data) => {
       if (data) setRosterData(data);
+    });
+
+    fetchRosterEntries().then((list) => {
+      if (Array.isArray(list) && list.length > 0) {
+        setRosterData(prev => ({ ...prev, members: list }));
+        saveRosterMembers('members', list);
+      }
     });
 
     const unsubscribe = subscribeToRosterChanges((data) => {

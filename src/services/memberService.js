@@ -84,7 +84,10 @@ function loadStoredDB() {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
       const parsed = JSON.parse(saved)
-      if (parsed && typeof parsed === 'object') {
+      if (Array.isArray(parsed)) {
+        storedObject['members'] = parsed
+        storedObject['diffsnow'] = parsed
+      } else if (parsed && typeof parsed === 'object') {
         const valid = parsed?.data && typeof parsed.data === 'object' && !Array.isArray(parsed.data) ? parsed.data : parsed
         storedObject = { ...valid }
       }
