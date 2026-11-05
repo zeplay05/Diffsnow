@@ -1,0 +1,1013 @@
+/* ==========================================================================
+   Page Layout & Background (Diffsnow - Deep Ice Blue Aesthetic)
+   ========================================================================== */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  padding: clamp(20px, 3vh, 32px) 16px 12px 16px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-attachment: fixed;
+  background-size: cover;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  font-family: 'Prompt', sans-serif !important;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    background-attachment: scroll;
+    padding: clamp(16px, 2.5vh, 24px) 12px 10px 12px;
+  }
+}
+
+/* ==========================================================================
+   Top Title: DIFFSNOW + WE FEARED NOTHING (Chakra Petch)
+   ========================================================================== */
+.top-title-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin: 0;
+  user-select: none;
+  z-index: 10;
+}
+
+.hero-title.top-title {
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-size: clamp(32px, 5.2vw, 64px);
+  font-weight: 800;
+  letter-spacing: clamp(6px, 1.2vw, 14px);
+  text-transform: uppercase;
+  color: #ffffff;
+  text-shadow: 
+    0 0 20px rgba(56, 189, 248, 0.7),
+    0 0 45px rgba(14, 165, 233, 0.45),
+    0 4px 18px rgba(0, 0, 0, 0.9);
+  margin: 0;
+  text-align: center;
+  user-select: none;
+  line-height: 1.15;
+}
+
+.hero-subtitle {
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-size: clamp(10px, 1.2vw, 14px);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: clamp(4px, 0.45em, 9px);
+  color: rgba(186, 230, 253, 0.85);
+  text-shadow: 0 0 16px rgba(56, 189, 248, 0.55);
+  margin: clamp(4px, 0.8vh, 8px) 0 0 0;
+  padding-left: clamp(4px, 0.45em, 9px);
+  line-height: 1.2;
+}
+
+/* ==========================================================================
+   Center Logo Showcase (LOGO DIFFSNOW.png)
+   ========================================================================== */
+.center-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex: 1;
+  margin: clamp(6px, 1.5vh, 18px) 0;
+  z-index: 10;
+  user-select: none;
+}
+
+.center-hero-logo {
+  width: clamp(320px, 46vw, 650px);
+  max-height: clamp(300px, 52vh, 580px);
+  height: auto;
+  object-fit: contain;
+  filter: 
+    drop-shadow(0 0 25px rgba(56, 189, 248, 0.65))
+    drop-shadow(0 0 60px rgba(14, 165, 233, 0.45))
+    drop-shadow(0 12px 30px rgba(0, 0, 0, 0.85));
+  animation: floatLogo 6s ease-in-out infinite;
+  transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+.center-hero-logo:hover {
+  transform: scale(1.04);
+  filter: 
+    drop-shadow(0 0 35px rgba(56, 189, 248, 0.9))
+    drop-shadow(0 0 85px rgba(14, 165, 233, 0.6))
+    drop-shadow(0 16px 36px rgba(0, 0, 0, 0.9));
+}
+
+@keyframes floatLogo {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* ==========================================================================
+   Bottom Section (ปุ่มอยู่ข้างล่าง + Bottom Bar)
+   ========================================================================== */
+.bottom-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: clamp(14px, 2vh, 22px);
+  margin-top: auto;
+  z-index: 10;
+}
+
+.main-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  margin: 0 0 clamp(30px, 4.2vh, 54px) 0;
+}
+
+/* ==========================================================================
+   Center Main Button (วางด้านล่าง แบบใน triplespf.xyz)
+   ========================================================================== */
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.center-main-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 372px;
+  max-width: 92vw;
+  height: 72px;
+  min-height: 72px;
+  padding: 0 32px;
+  box-sizing: border-box;
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: rgba(8, 22, 42, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid rgba(56, 189, 248, 0.38);
+  border-radius: 18px;
+  box-shadow: 
+    0 12px 34px rgba(0, 0, 0, 0.75),
+    0 0 25px rgba(56, 189, 248, 0.22),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.55);
+  user-select: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.center-main-btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(56, 189, 248, 0.65);
+  box-shadow: 
+    0 16px 40px rgba(0, 0, 0, 0.8),
+    0 0 35px rgba(56, 189, 248, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.25);
+}
+
+.center-main-btn span {
+  display: inline-block;
+  line-height: 1;
+}
+
+.center-main-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(186, 230, 253, 0.25),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.center-main-btn:hover::before {
+  left: 100%;
+}
+
+.center-main-btn:hover {
+  background: rgba(14, 38, 72, 0.94);
+  color: #ffffff;
+  border-color: rgba(125, 211, 252, 0.85);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 
+    0 16px 40px rgba(0, 0, 0, 0.8),
+    0 0 35px rgba(56, 189, 248, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 0 20px rgba(56, 189, 248, 0.9);
+}
+
+.center-main-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* ==========================================================================
+   Bottom Bar (Centered Footer)
+   ========================================================================== */
+.bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 8px 16px 2px 16px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* Footer: SYSTEM DESIGN BY MEWIE CONQUERS */
+.site-footer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-size: clamp(9.5px, 1.05vw, 12px);
+  letter-spacing: clamp(2.5px, 0.26em, 5px);
+  text-transform: uppercase;
+  user-select: none;
+  white-space: nowrap;
+  gap: 7px;
+  margin: 0 auto;
+}
+
+.footer-prefix {
+  color: rgba(186, 230, 253, 0.45);
+  font-weight: 500;
+}
+
+.footer-author {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 700;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.45);
+}
+
+@media (max-width: 680px) {
+  .bottom-bar {
+    padding-bottom: 48px; /* Leave space for bottom music player on mobile */
+  }
+}
+
+/* ==========================================================================
+   VIEW 2: MEMBER LIST PAGE (Blue Tone Glassmorphic Roster)
+   ========================================================================== */
+.members-page-wrapper {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-attachment: fixed;
+  background-size: cover;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  font-family: 'Prompt', sans-serif !important;
+  color: #ffffff;
+  padding-bottom: 70px;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .members-page-wrapper {
+    background-attachment: scroll;
+  }
+}
+
+/* Top Bar: Home Navigation */
+.members-nav-bar {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 24px 8px 24px;
+  display: flex;
+  justify-content: flex-end;
+  position: relative;
+  z-index: 50;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  border-radius: 12px;
+  background: rgba(8, 22, 42, 0.75);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: rgba(186, 230, 253, 0.85);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  user-select: none;
+}
+
+.home-icon {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  transition: transform 0.25s ease;
+}
+
+.back-btn:hover {
+  border-color: rgba(125, 211, 252, 0.7);
+  color: #ffffff;
+  background: rgba(14, 34, 64, 0.88);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
+  transform: translateY(-2px);
+}
+
+.back-btn:hover .home-icon {
+  transform: scale(1.15);
+}
+
+/* Members Content Container */
+.members-content-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 10px 24px 40px 24px;
+  position: relative;
+  z-index: 10;
+}
+
+@media (max-width: 600px) {
+  .members-content-container {
+    padding: 6px 14px 40px 14px;
+  }
+  .members-nav-bar {
+    padding: 16px 14px 6px 14px;
+  }
+}
+
+/* Header Section */
+.members-header-section {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.members-main-title {
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-weight: 800;
+  font-size: clamp(26px, 5.5vw, 48px);
+  letter-spacing: clamp(4px, 0.4em, 12px);
+  text-transform: uppercase;
+  color: #ffffff;
+  margin: 0;
+  text-shadow: 0 0 30px rgba(56, 189, 248, 0.6), 0 4px 15px rgba(0, 0, 0, 0.9);
+}
+
+.members-sub-title {
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-weight: 600;
+  font-size: clamp(10px, 1.2vw, 13px);
+  letter-spacing: clamp(3px, 0.45em, 8px);
+  text-transform: uppercase;
+  color: rgba(186, 230, 253, 0.75);
+  margin: 8px 0 0 0;
+  text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+}
+
+/* Live Search Bar */
+.search-bar-wrapper {
+  max-width: 440px;
+  margin: 0 auto clamp(28px, 4vh, 44px) auto;
+  position: relative;
+}
+
+.members-search-input {
+  width: 100%;
+  padding: 13px 24px;
+  border-radius: 9999px;
+  background: rgba(8, 22, 42, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #ffffff;
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-size: clamp(11px, 1.2vw, 13px);
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-align: center;
+  text-transform: uppercase;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.members-search-input::placeholder {
+  color: rgba(186, 230, 253, 0.45);
+}
+
+.members-search-input:focus {
+  background: rgba(12, 30, 56, 0.9);
+  border-color: rgba(56, 189, 248, 0.85);
+  box-shadow: 0 0 25px rgba(56, 189, 248, 0.45);
+  outline: none;
+}
+
+/* Rank Sections */
+.rank-section-group {
+  margin-bottom: clamp(36px, 6vh, 56px);
+}
+
+.section-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.section-title-text {
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-size: clamp(12px, 1.5vw, 15px);
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(186, 230, 253, 0.7);
+  margin: 0;
+  white-space: nowrap;
+}
+
+.section-count-badge {
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-size: 11px;
+  font-weight: 600;
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.section-divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.35), transparent);
+}
+
+.members-sections-wrapper {
+  max-width: 1020px;
+  margin: 0 auto;
+}
+
+/* Members Grid */
+.members-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 320px));
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+@media (max-width: 1040px) {
+  .members-grid {
+    grid-template-columns: repeat(2, minmax(0, 320px));
+    gap: 14px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 680px) {
+  .members-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    justify-items: center;
+    width: 100%;
+  }
+
+  .member-card {
+    max-width: 360px;
+    width: 100%;
+  }
+}
+
+/* ==========================================================================
+   Member Card (Blue Frosted Glass)
+   ========================================================================== */
+.member-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+  background: rgba(8, 22, 42, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 18px;
+  padding: 10px 14px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65), 0 0 15px rgba(56, 189, 248, 0.08);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-sizing: border-box;
+  min-height: 66px;
+}
+
+.member-card:hover {
+  background: rgba(14, 34, 64, 0.94);
+  border-color: rgba(125, 211, 252, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55), 0 0 20px rgba(56, 189, 248, 0.25);
+}
+
+.member-card.rank-boss,
+.member-card.rank-leader,
+.member-card.rank-respect,
+.member-card.rank-lastname,
+.member-card.rank-member {
+  background: rgba(8, 22, 42, 0.88) !important;
+  border: 1px solid rgba(56, 189, 248, 0.25) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65) !important;
+}
+
+.member-card.rank-boss:hover,
+.member-card.rank-leader:hover,
+.member-card.rank-respect:hover,
+.member-card.rank-lastname:hover,
+.member-card.rank-member:hover {
+  background: rgba(14, 34, 64, 0.94) !important;
+  border-color: rgba(125, 211, 252, 0.6) !important;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.55), 0 0 20px rgba(56, 189, 248, 0.25) !important;
+}
+
+/* Avatar Box */
+.member-avatar-box {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.member-avatar-box:hover {
+  transform: scale(1.06);
+  border-color: rgba(125, 211, 252, 0.9);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+}
+
+.member-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.member-status-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 9px;
+  height: 9px;
+  background: #38bdf8;
+  border: 1.5px solid #030d1a;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #38bdf8;
+}
+
+/* Info Stack */
+.member-info-stack {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  flex: 1;
+}
+
+.member-name-heading {
+  font-family: 'Prompt', sans-serif !important;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.member-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.member-head-badge-icon,
+.member-leader-badge-icon {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: inline-block;
+  filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.6));
+}
+
+.member-rank-subtitle {
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: rgba(125, 211, 252, 0.65);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin: 2px 0 0 0;
+}
+
+/* Social Actions Row */
+.member-actions-row {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.member-action-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 10px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: rgba(186, 230, 253, 0.85);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.member-action-pill:hover {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: rgba(125, 211, 252, 0.7);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.4);
+}
+
+/* Empty State Container */
+.empty-members-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin: 30px auto;
+  max-width: 520px;
+  padding: clamp(30px, 5vh, 48px) 24px;
+  background: rgba(8, 22, 42, 0.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.empty-badge {
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  padding: 4px 14px;
+  border-radius: 20px;
+  margin-bottom: 14px;
+}
+
+.empty-members-title {
+  font-family: 'Prompt', sans-serif !important;
+  font-size: clamp(16px, 2vw, 19px);
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 6px 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.empty-members-subtitle {
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-size: clamp(10px, 1.2vw, 12px);
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(186, 230, 253, 0.55);
+  margin: 0;
+}
+
+/* ==========================================================================
+   Profile Modal Styles (Blue Frosted Glass)
+   ========================================================================= */
+.profile-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+  animation: fadeIn 0.2s ease;
+}
+
+.profile-modal-card {
+  background: rgba(8, 22, 42, 0.96);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 440px;
+  padding: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 30px rgba(56, 189, 248, 0.2);
+  box-sizing: border-box;
+  animation: zoomIn 0.2s ease;
+  color: #ffffff;
+}
+
+.profile-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.profile-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+.profile-modal-close {
+  background: transparent;
+  border: none;
+  color: rgba(186, 230, 253, 0.6);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.2s;
+}
+
+.profile-modal-close:hover {
+  color: #ffffff;
+}
+
+.profile-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(56, 189, 248, 0.05);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 18px;
+}
+
+.profile-preview-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(56, 189, 248, 0.5);
+}
+
+.profile-target-name {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.profile-target-rank {
+  color: rgba(125, 211, 252, 0.7);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.profile-field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(186, 230, 253, 0.8);
+  letter-spacing: 0.08em;
+  margin: 12px 0 6px 0;
+  text-transform: uppercase;
+}
+
+.profile-input {
+  width: 100%;
+  background: rgba(4, 14, 28, 0.8);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #ffffff;
+  font-size: 13px;
+  font-family: inherit;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.profile-input:focus {
+  border-color: rgba(56, 189, 248, 0.75);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.35);
+}
+
+.profile-msg {
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.profile-msg.error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.profile-msg.success {
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #7dd3fc;
+}
+
+.profile-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.profile-btn {
+  padding: 9px 20px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.profile-btn.cancel {
+  background: rgba(56, 189, 248, 0.1);
+  color: rgba(186, 230, 253, 0.8);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.profile-btn.cancel:hover {
+  background: rgba(56, 189, 248, 0.18);
+  color: #ffffff;
+}
+
+.profile-btn.save {
+  background: linear-gradient(135deg, #0284c7, #0ea5e9, #38bdf8);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.4);
+}
+
+.profile-btn.save:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.5);
+}
+
+/* ==========================================================================
+   Canvas & Animations
+   ========================================================================== */
+.firefly-bg-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   Diffsnow Music Player UI (Ice-Blue Cyber Aesthetic)
+   ========================================================================== */
+@keyframes spinDisc {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.85); }
+}
+
+@keyframes barBounce1 { 0%, 100% { height: 4px; } 50% { height: 16px; } }
+@keyframes barBounce2 { 0%, 100% { height: 14px; } 50% { height: 6px; } }
+@keyframes barBounce3 { 0%, 100% { height: 7px; } 50% { height: 18px; } }
+@keyframes barBounce4 { 0%, 100% { height: 16px; } 50% { height: 7px; } }
+@keyframes barBounce5 { 0%, 100% { height: 6px; } 50% { height: 15px; } }
+@keyframes barBounce6 { 0%, 100% { height: 13px; } 50% { height: 5px; } }
+@keyframes barBounce7 { 0%, 100% { height: 8px; } 50% { height: 17px; } }
+
+.diffsnow-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+}
+
+.diffsnow-slider-thumb::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.95), 0 0 4px #ffffff;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.15s ease;
+}
+
+.diffsnow-slider-thumb::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
+
+.diffsnow-slider-thumb::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.95), 0 0 4px #ffffff;
+  cursor: pointer;
+  border: none;
+}
+

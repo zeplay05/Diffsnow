@@ -1,0 +1,648 @@
+/* ==========================================================================
+   Cyber-Glass Holographic Music Player (Ultra-Premium Red & Dark Glass)
+   ========================================================================== */
+#cyber-music-widget {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  font-family: 'Prompt', sans-serif !important;
+  user-select: none;
+}
+
+#cyber-music-widget.is-preview-mode {
+  position: relative;
+  bottom: auto;
+  right: auto;
+  z-index: 1;
+}
+
+@media (max-width: 600px) {
+  #cyber-music-widget {
+    bottom: 14px;
+    right: 14px;
+    max-width: calc(100vw - 28px);
+  }
+
+  .cyber-pill {
+    max-width: 100%;
+  }
+
+  .cyber-card {
+    max-width: calc(100vw - 28px) !important;
+  }
+}
+
+/* ==========================================================================
+   1. Compact Capsule (ตอนย่อ - Sleek Glass Pill)
+   ========================================================================== */
+.cyber-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 14px 6px 6px;
+  background: linear-gradient(135deg, rgba(8, 22, 42, 0.55) 0%, rgba(4, 14, 28, 0.75) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 9999px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.15);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  max-width: 300px;
+}
+
+.cyber-pill:hover {
+  background: linear-gradient(135deg, rgba(14, 32, 60, 0.7) 0%, rgba(6, 18, 36, 0.88) 100%);
+  border-color: rgba(56, 189, 248, 0.5);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.7), 0 0 25px rgba(56, 189, 248, 0.3);
+}
+
+.pill-disc-frame {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+}
+
+.pill-vinyl {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.pill-vinyl.spin {
+  animation: vinyl-rotate 9s linear infinite;
+}
+
+.pill-vinyl-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid #000000;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+}
+
+.pill-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 130px;
+}
+
+.pill-status-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.live-badge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.live-badge-dot.is-green {
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e, 0 0 3px #86efac;
+  animation: dot-flicker-green 1.4s infinite;
+}
+
+.live-badge-dot.is-red {
+  background: #38bdf8;
+  box-shadow: 0 0 6px #38bdf8;
+}
+
+@keyframes dot-flicker-green {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 8px #22c55e, 0 0 3px #86efac; }
+  50% { opacity: 0.4; transform: scale(0.85); box-shadow: 0 0 4px #22c55e; }
+}
+
+.pill-status-text {
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.pill-song-name {
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.05em;
+}
+
+/* Mini Equalizer Bars */
+.pill-eq-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 14px;
+  padding: 0 2px;
+}
+
+.pill-eq-bars .eq-bar {
+  width: 2px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 2px;
+  transition: height 0.2s ease, background 0.2s ease;
+}
+
+.pill-eq-bars.active .eq-bar {
+  background: #38bdf8;
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
+  animation: bounce-eq 0.7s infinite alternate ease-in-out;
+}
+
+.pill-eq-bars.active .b1 { animation-delay: 0.1s; }
+.pill-eq-bars.active .b2 { animation-delay: 0.35s; }
+.pill-eq-bars.active .b3 { animation-delay: 0.2s; }
+.pill-eq-bars.active .b4 { animation-delay: 0.45s; }
+
+.pill-action-btn {
+  background: #18181b;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-left: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.pill-action-btn:hover {
+  background: #38bdf8;
+  border-color: #38bdf8;
+  color: #ffffff;
+  transform: scale(1.1);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.7);
+}
+
+/* ==========================================================================
+   2. Cyber-Glass Player Card (Expanded - ดีไซน์ใหม่ สวยล้ำแบบ Hologram)
+   ========================================================================== */
+.cyber-player-card {
+  width: 285px;
+  padding: 16px 18px 18px 18px;
+  background: linear-gradient(135deg, rgba(26, 20, 30, 0.58) 0%, rgba(12, 10, 16, 0.76) 100%);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 24px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.75), 0 0 35px rgba(56, 189, 248, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: cyber-pop 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ambient glow corner */
+.cyber-player-card::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.25), transparent 70%);
+  pointer-events: none;
+}
+
+@keyframes cyber-pop {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Header */
+.cyber-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cyber-badge-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.cyber-live-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.cyber-live-indicator.is-green {
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e, 0 0 4px #86efac;
+  animation: dot-flicker-green 1.4s infinite;
+}
+
+.cyber-live-indicator.is-red {
+  background: #38bdf8;
+  box-shadow: 0 0 7px #38bdf8;
+}
+
+.cyber-badge-title {
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+}
+
+.cyber-collapse-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.cyber-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+/* Track Showcase */
+.cyber-track-showcase {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.vinyl-cover-container {
+  position: relative;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #000000;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8);
+}
+
+.vinyl-art-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.vinyl-art-image.spinning {
+  animation: vinyl-rotate 9s linear infinite;
+}
+
+@keyframes vinyl-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.vinyl-center-groove {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle, #ffffff 25%, #111111 26%, #111111 60%, rgba(255, 255, 255, 0.4) 61%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
+}
+
+.vinyl-glow-aura {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.vinyl-glow-aura.active {
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: inset 0 0 12px rgba(56, 189, 248, 0.4);
+}
+
+.cyber-track-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 3px;
+  flex: 1;
+}
+
+.cyber-title-text {
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8), 0 0 12px rgba(255, 255, 255, 0.2);
+}
+
+.cyber-artist-text {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Equalizer Bars */
+.cyber-equalizer {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 12px;
+  margin-top: 4px;
+}
+
+.eq-col {
+  width: 2.5px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  transition: height 0.2s ease, background 0.2s ease;
+}
+
+.cyber-equalizer.playing .eq-col {
+  background: linear-gradient(180deg, #ff7a63 0%, #38bdf8 100%);
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.6);
+  animation: bounce-eq 0.7s infinite alternate ease-in-out;
+}
+
+.cyber-equalizer.playing .e1 { animation-delay: 0.15s; }
+.cyber-equalizer.playing .e2 { animation-delay: 0.4s; }
+.cyber-equalizer.playing .e3 { animation-delay: 0.22s; }
+.cyber-equalizer.playing .e4 { animation-delay: 0.5s; }
+.cyber-equalizer.playing .e5 { animation-delay: 0.3s; }
+.cyber-equalizer.playing .e6 { animation-delay: 0.6s; }
+.cyber-equalizer.playing .e7 { animation-delay: 0.18s; }
+
+@keyframes bounce-eq {
+  0% { height: 3px; }
+  50% { height: 11px; }
+  100% { height: 6px; }
+}
+
+/* Progress Box */
+.cyber-progress-box {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.scrubber-track-wrapper {
+  position: relative;
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+}
+
+.scrubber-fill-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8 0%, #ff8a00 100%);
+  border-radius: 9999px;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.7);
+  pointer-events: none;
+}
+
+.cyber-scrubber-input {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+  z-index: 2;
+  margin: 0;
+}
+
+.cyber-scrubber-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.9), 0 0 4px #ffffff;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.cyber-scrubber-input::-webkit-slider-thumb:hover {
+  transform: scale(1.35);
+}
+
+.cyber-time-display {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Chakra Petch', sans-serif !important;
+  font-size: 9.5px;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 600;
+}
+
+/* Symmetrical Controls Bar */
+.cyber-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 2px 0;
+}
+
+.cyber-step-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.22s ease;
+  backdrop-filter: blur(8px);
+}
+
+.cyber-step-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+.cyber-step-btn:active {
+  transform: scale(0.95);
+}
+
+/* Circular Play / Pause Button (ดำแบบรูป 2 และ Hover แดงแบบรูป 3) */
+.cyber-play-jewel {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #24222a 0%, #131217 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+  flex-shrink: 0;
+}
+
+.cyber-play-jewel:hover {
+  transform: scale(1.08);
+  background: #38bdf8;
+  border-color: #38bdf8;
+  color: #ffffff;
+  box-shadow: 0 0 24px rgba(56, 189, 248, 0.75), 0 0 8px #38bdf8;
+}
+
+.cyber-play-jewel:active {
+  transform: scale(0.96);
+}
+
+/* Volume Capsule */
+.cyber-volume-capsule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+}
+
+.cyber-vol-icon-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.cyber-vol-icon-btn:hover {
+  color: #ffffff;
+}
+
+.vol-slider-wrap {
+  position: relative;
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+}
+
+.vol-fill-line {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: #38bdf8;
+  border-radius: 9999px;
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.6);
+  pointer-events: none;
+}
+
+.cyber-vol-slider {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+  z-index: 2;
+  margin: 0;
+}
+
+.cyber-vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.cyber-vol-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}

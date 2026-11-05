@@ -1,0 +1,464 @@
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;600;800;900&family=Orbitron:wght@400;600;800;900&display=swap');
+
+:root {
+  --font-chakra-petch: 'Chakra Petch', sans-serif;
+  --font-orbitron: 'Orbitron', sans-serif;
+  --font-inter: 'Inter', sans-serif;
+  
+  --gold: #38bdf8;
+  --gold-metallic: #0284c7;
+  --gold-glow: rgba(56, 189, 248, 0.4);
+  --theme-accent: #38bdf8;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  max-width: 100vw;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background-color: #000000;
+  color: #ffffff;
+  font-family: var(--font-chakra-petch);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  background-image: 
+    linear-gradient(rgba(3, 15, 30, 0.42), rgba(2, 6, 23, 0.68)),
+    radial-gradient(circle at 50% 35%, rgba(56, 189, 248, 0.15) 0%, transparent 65%),
+    url('/asset/diffsnow-bg.png');
+  background-size: cover, cover, cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+/* Theme choices from Admin → Appearance. These affect shared public controls,
+   cards, highlights and the background glow on every device. */
+body[data-theme="Apex Crimson"] { --theme-accent: #ef4444; --gold-glow: rgba(239, 68, 68, .4); }
+body[data-theme="Apex Azure"] { --theme-accent: #38bdf8; --gold-glow: rgba(56, 189, 248, .4); }
+body[data-theme="Void Black"] { --theme-accent: #a855f7; --gold-glow: rgba(168, 85, 247, .4); }
+body[data-theme="Neon Rose"] { --theme-accent: #ec4899; --gold-glow: rgba(236, 72, 153, .4); }
+body[data-theme="Cyber Teal"] { --theme-accent: #14b8a6; --gold-glow: rgba(20, 184, 166, .4); }
+body[data-theme="Solar Amber"] { --theme-accent: #f59e0b; --gold-glow: rgba(245, 158, 11, .4); }
+
+body[data-theme]:not([data-theme="Apex Gold"]) .snowflake {
+  background: var(--theme-accent);
+  box-shadow: 0 0 6px var(--gold-glow);
+}
+
+body[data-theme]:not([data-theme="Apex Gold"]) .badge-vip,
+body[data-theme]:not([data-theme="Apex Gold"]) .btn-primary,
+body[data-theme]:not([data-theme="Apex Gold"]) .btn-cyan {
+  background: var(--theme-accent);
+  border-color: var(--theme-accent);
+  box-shadow: 0 4px 20px var(--gold-glow);
+}
+
+#root {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Snowflake Falling Effect */
+#snow-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.snowflake {
+  position: absolute;
+  background: rgba(56, 189, 248, 0.8);
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: fall linear infinite;
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.6);
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-10vh);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(105vh) translateX(20px);
+    opacity: 0;
+  }
+}
+
+/* Typewriter Animation from original index.php */
+@keyframes typing {
+  0%, 90%, 100% {
+    width: 0;
+  }
+  30%, 60% {
+    width: 100%;
+  }
+}
+
+@keyframes blink-caret {
+  from, to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: var(--theme-accent, #38bdf8);
+  }
+}
+
+.typewriter {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 3px solid var(--theme-accent);
+  width: 0;
+  animation: typing 8s steps(30, end) infinite, blink-caret 0.75s step-end infinite;
+}
+
+/* Motion & Pulse Animations */
+@keyframes video-motion {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-15px) scale(1.03);
+  }
+}
+
+.animate-motion-only {
+  animation: video-motion 4s ease-in-out infinite;
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 8s ease-in-out infinite;
+}
+
+/* Glass Panels & Modern Styling */
+.glass-panel {
+  background: rgba(15, 15, 15, 0.85);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel:hover {
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 15px 50px rgba(56, 189, 248, 0.15);
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.badge-whitelist {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-blacklist {
+  background: rgba(244, 63, 94, 0.15);
+  color: #fb7185;
+  border: 1px solid rgba(244, 63, 94, 0.3);
+}
+
+.badge-reseller {
+  background: rgba(0, 240, 255, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+.badge-vip {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+/* Cyber Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  color: #000000;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-family: var(--font-chakra-petch);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 20px rgba(56, 189, 248, 0.35);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.15);
+  box-shadow: 0 6px 28px rgba(56, 189, 248, 0.5);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.6);
+  transform: translateY(-1px);
+}
+
+.btn-cyan {
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  color: #000000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.input-cyber {
+  background: rgba(14, 14, 14, 0.9);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 12px;
+  outline: none;
+  font-family: var(--font-chakra-petch);
+  font-size: 0.95rem;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.input-cyber:focus {
+  border-color: var(--theme-accent);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.25s ease;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(56, 189, 248, 0.2);
+}
+
+/* ── Custom Scrollbar ──────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+::-webkit-scrollbar-track {
+  background: #030712;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.4);
+  border-radius: 99px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.8);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.4) #030712;
+}
+
+/* ── Admin dashboard responsive shell ───────────────────────────────────── */
+.admin-mobile-header,
+.admin-sidebar-overlay,
+.admin-sidebar-close { display: none; }
+
+.admin-main { min-width: 0; }
+
+@media (max-width: 860px) {
+  .admin-shell {
+    display: block !important;
+    height: 100dvh !important;
+    max-height: none !important;
+    min-height: 100dvh;
+    overflow: hidden !important;
+  }
+
+  .admin-mobile-header {
+    position: fixed;
+    inset: 0 0 auto;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    background: rgba(10, 10, 14, 0.94);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(18px);
+    z-index: 30;
+  }
+
+  .admin-menu-button {
+    width: 38px; height: 38px; display: grid; place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04); color: #fff; cursor: pointer;
+  }
+
+  .admin-mobile-brand { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 900; letter-spacing: 0.08em; }
+  .admin-mobile-brand img { width: 28px; height: 28px; object-fit: contain; }
+
+  .admin-sidebar-overlay {
+    display: block; position: fixed; inset: 0; z-index: 39; opacity: 0; visibility: hidden;
+    border: 0; background: rgba(0, 0, 0, 0.66); transition: opacity 0.22s ease, visibility 0.22s ease;
+  }
+  .admin-sidebar-overlay.is-visible { opacity: 1; visibility: visible; }
+
+  .admin-sidebar {
+    position: fixed !important; inset: 0 auto 0 0; width: min(84vw, 320px) !important;
+    height: 100dvh !important; transform: translateX(-105%); transition: transform 0.24s ease;
+    z-index: 40 !important; overflow-y: auto; padding-top: 18px !important;
+  }
+  .admin-sidebar.is-open { transform: translateX(0); box-shadow: 18px 0 48px rgba(0, 0, 0, 0.5); }
+
+  .admin-sidebar-close {
+    display: grid; place-items: center; position: absolute; top: 14px; right: 12px;
+    width: 34px; height: 34px; border: 0; border-radius: 9px;
+    background: rgba(255, 255, 255, 0.06); color: rgba(255, 255, 255, 0.7); cursor: pointer;
+  }
+  .admin-sidebar-top { padding-top: 28px; }
+
+  .admin-main {
+    height: 100dvh !important; overflow-y: auto !important; padding: 80px 16px 28px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  .admin-main > div { max-width: 100% !important; }
+  .admin-responsive-two-column { grid-template-columns: 1fr !important; gap: 20px !important; }
+  .admin-member-actions { width: 100%; flex-wrap: wrap; }
+}
+
+@media (max-width: 480px) {
+  .admin-main { padding: 76px 12px 22px !important; }
+  .admin-main [style*="border-radius: 24px"] { border-radius: 18px !important; }
+  .admin-main [style*="padding: 28px"] { padding: 20px !important; }
+  .admin-member-actions > * { flex: 1 1 auto; justify-content: center; }
+}
+
+/* Tablet and compact desktop: keep the complete navigation above the content.
+   This mirrors the dashboard's vertical mobile composition instead of a drawer. */
+@media (max-width: 1100px) {
+  .admin-shell {
+    display: flex !important;
+    flex-direction: column;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 100vh;
+    overflow: visible !important;
+  }
+
+  .admin-mobile-header,
+  .admin-sidebar-overlay,
+  .admin-sidebar-close { display: none !important; }
+
+  .admin-sidebar {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0;
+    transform: none !important;
+    transition: none;
+    overflow: visible;
+    padding: 18px 16px !important;
+    box-shadow: none !important;
+    z-index: 1 !important;
+  }
+
+  .admin-sidebar-top { padding-top: 0; }
+
+  .admin-main {
+    width: 100%;
+    height: auto !important;
+    min-height: 0;
+    overflow: visible !important;
+    padding: 20px 16px 32px !important;
+  }
+}
