@@ -62,7 +62,7 @@ export const JoinRequestModal = () => {
   };
 
   const handlePasscodeSubmit = () => {
-    if (['diffsnow482024', 'Diffsnow482024'].includes(passcode.trim())) {
+    if (['member', 'member'].includes(passcode.trim())) {
       setPasscodeError('');
       setStep('form');
     } else {

@@ -159,12 +159,23 @@ export const fetchRosterEntries = async () => {
       if (res.ok) {
         const data = await res.json();
         if (data) {
-          const list = Array.isArray(data) 
-            ? data.filter(Boolean) 
-            : Object.keys(data).map(key => ({ ...data[key], firebaseKey: key }));
+          let list = [];
+          if (Array.isArray(data)) {
+            list = data.filter(Boolean);
+          } else if (typeof data === 'object') {
+            if (Array.isArray(data.members)) {
+              list = data.members;
+            } else if (Array.isArray(data.diffsnow)) {
+              list = data.diffsnow;
+            } else {
+              list = Object.keys(data).map(key => ({ ...data[key], firebaseKey: key }));
+            }
+          }
           
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
-          return list;
+          if (list.length > 0) {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
+            return list;
+          }
         }
       }
     } catch (err) {
@@ -172,18 +183,34 @@ export const fetchRosterEntries = async () => {
     }
   }
 
-  // LocalStorage fallback
+  // LocalStorage fallback (reads array or object formats, plus sub-keys)
   try {
     const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (cached) {
-      return JSON.parse(cached);
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+      if (parsed && typeof parsed === 'object') {
+        if (Array.isArray(parsed.members) && parsed.members.length > 0) return parsed.members;
+        if (Array.isArray(parsed.diffsnow) && parsed.diffsnow.length > 0) return parsed.diffsnow;
+        if (Array.isArray(parsed.data) && parsed.data.length > 0) return parsed.data;
+      }
+    }
+
+    const subCached = localStorage.getItem('triples_members_members') || localStorage.getItem('triples_members_diffsnow');
+    if (subCached) {
+      const parsedSub = JSON.parse(subCached);
+      if (Array.isArray(parsedSub) && parsedSub.length > 0) {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(parsedSub));
+        return parsedSub;
+      }
     }
   } catch (e) {
-    console.error(e);
+    console.error('LocalStorage parse error:', e);
   }
 
   // Default seed
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(INITIAL_ROSTER));
   return INITIAL_ROSTER;
 };
 

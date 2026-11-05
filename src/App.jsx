@@ -95,6 +95,18 @@ function App() {
 
   useEffect(() => {
     loadData();
+  }, [currentPage]);
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      loadData();
+    };
+    window.addEventListener('diffsnow_roster_updated', handleUpdate);
+    window.addEventListener('triples_roster_updated', handleUpdate);
+    return () => {
+      window.removeEventListener('diffsnow_roster_updated', handleUpdate);
+      window.removeEventListener('triples_roster_updated', handleUpdate);
+    };
   }, []);
 
   useEffect(() => {

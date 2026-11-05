@@ -15,6 +15,7 @@ import {
   rejectJoinRequest,
   deleteJoinRequest
 } from '../services/joinRequestService';
+import { getFirebaseConfig } from '../services/firebaseService';
 import './admin.css';
 
 // ─── Icons (inline SVG) ───────────────────────────────────────────────────────
@@ -213,7 +214,7 @@ function SectionHeader({ icon, title, iconColor, iconBg }) {
 }
 
 // ─── Main Triples Admin Component ─────────────────────────────────────────────
-export default function AdminDashboard({ onLogout, onGoToLiveSite }) {
+export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData }) {
   const [tab, setTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -512,6 +513,42 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite }) {
     if (!currentRoster) return;
     setRosterData(prev => ({ ...prev, [currentRoster.id]: newEntries }));
     saveRosterMembers(currentRoster.id, newEntries);
+
+    // Save directly into diffsnow_roster_data & triples_members_members for public pages
+    try {
+      localStorage.setItem('diffsnow_roster_data', JSON.stringify(newEntries));
+      localStorage.setItem('triples_members_members', JSON.stringify(newEntries));
+      localStorage.setItem(`triples_members_${currentRoster.id}`, JSON.stringify(newEntries));
+    } catch (e) {
+      console.warn('LocalStorage save error:', e);
+    }
+
+    // Auto-sync to Firebase Realtime Database
+    try {
+      const config = getFirebaseConfig();
+      const targetDbUrl = (fbUrl && fbUrl.trim()) || config?.dbUrl;
+      const targetToken = (fbSecretToken && fbSecretToken.trim()) || config?.secretToken;
+      if (targetDbUrl) {
+        let endpoint = `${targetDbUrl.replace(/\/$/, '')}/roster.json`;
+        if (targetToken) endpoint += `?auth=${targetToken}`;
+        fetch(endpoint, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newEntries)
+        }).catch(err => console.warn('Auto Firebase sync error:', err));
+      }
+    } catch (e) {
+      console.warn('Firebase auto-push error:', e);
+    }
+
+    // Broadcast update event and trigger parent refresh
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('diffsnow_roster_updated', { detail: newEntries }));
+      window.dispatchEvent(new CustomEvent('triples_roster_updated', { detail: newEntries }));
+    }
+    if (typeof onRefreshData === 'function') {
+      onRefreshData();
+    }
   };
 
   // Rank helper: HEAD (1), LEADER (2), SUPPORTER (3), MEMBER (4)
@@ -854,7 +891,7 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite }) {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
                     <span style={{ width: '7px', height: '7px', background: '#22c55e', borderRadius: '50%', display: 'inline-block' }} />
-                    <span style={{ fontSize: '10px', color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: '600' }}>Online</span>
+                    <span style={{ fontSize: '10px', color: '#22c55e', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: '700' }}>ONLINE</span>
                   </div>
                 </div>
               </div>
@@ -965,7 +1002,7 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite }) {
         {tab === 'dashboard' && (
           <div style={{ maxWidth: '1200px' }}>
             {/* Welcome Banner */}
-            <div style={{
+            <div className="admin-hero-banner" style={{
               background: 'rgba(15,15,15,0.6)',
               backdropFilter: 'blur(20px)',
               border: '1px solid rgba(255,255,255,0.06)',
@@ -1025,17 +1062,17 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite }) {
             </div>
 
             {/* Quick Guide Card Container */}
-            <GlassCard style={{ padding: '28px' }}>
+            <GlassCard className="admin-quickguide-card" style={{ padding: '28px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '16px', marginBottom: '24px' }}>
                 <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'rgba(226, 232, 240,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e2e8f0', fontWeight: '900', fontSize: '16px' }}>
                   #
                 </div>
                 <div>
                   <h2 style={{ fontSize: '16px', fontWeight: '900', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 2px' }}>
-                    📖 คู่มือการใช้งาน (Quick Guide)
+                    📖 คู่มือการใช้งาน (QUICK GUIDE)
                   </h2>
                   <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>
-                    กดที่แต่ละหมวดเพื่อไปยังฟังก์ชันนั้นๆ
+                    กดที่แต่ละกล่องเพื่อไปยังฟังก์ชันนั้นๆ
                   </p>
                 </div>
               </div>

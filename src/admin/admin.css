@@ -1350,34 +1350,36 @@
     background: #09090b !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     flex-shrink: 0;
-    height: 56px;
+    height: 56px !important;
     box-sizing: border-box;
     z-index: 100;
   }
 
+  /* Floating Modal-Style Sidebar Drawer matching Screenshot 2 */
   .admin-sidebar {
     position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
+    top: 14px !important;
+    left: 12px !important;
+    right: 12px !important;
     bottom: auto !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    width: calc(100% - 24px) !important;
+    max-width: 440px !important;
+    margin: 0 auto !important;
     height: auto !important;
-    max-height: 84vh !important;
-    max-height: 84dvh !important;
-    background: rgba(12, 12, 16, 0.98) !important;
-    backdrop-filter: blur(30px) !important;
-    -webkit-backdrop-filter: blur(30px) !important;
-    border-right: none !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-bottom-left-radius: 24px !important;
-    border-bottom-right-radius: 24px !important;
-    transform: translateY(-100%) !important;
-    transition: transform 0.32s cubic-bezier(0.32, 1, 0.23, 1) !important;
+    max-height: calc(100vh - 28px) !important;
+    max-height: calc(100dvh - 28px) !important;
+    background: #0d0d12 !important;
+    backdrop-filter: blur(28px) !important;
+    -webkit-backdrop-filter: blur(28px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 22px !important;
+    transform: translateY(-130%) scale(0.96) !important;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
     z-index: 1050 !important;
-    box-shadow: none !important;
-    padding: 16px 18px 14px 18px !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+    padding: 16px 16px 14px 16px !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: space-between !important;
@@ -1385,37 +1387,69 @@
   }
 
   .admin-sidebar.is-open {
-    transform: translateY(0) !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(0, 0, 0, 0.8) !important;
+    transform: translateY(0) scale(1) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
 
   .admin-brand-profile {
     margin-bottom: 12px !important;
     padding: 10px 12px !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 14px !important;
   }
 
   .admin-sidebar-top {
     overflow-y: auto !important;
     flex: 1 1 auto !important;
-    padding-right: 6px !important;
+    padding-right: 4px !important;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
   }
 
   .admin-sidebar-bottom {
+    display: flex !important;
     flex-direction: row !important;
-    gap: 8px !important;
-    padding-top: 10px !important;
-    margin-top: 4px !important;
+    gap: 10px !important;
+    padding-top: 14px !important;
+    margin-top: 8px !important;
     flex-shrink: 0 !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
   }
 
   .admin-sidebar-bottom > button {
     flex: 1 1 50% !important;
+    display: flex !important;
+    align-items: center !important;
     justify-content: center !important;
-    padding: 9px 12px !important;
-    font-size: 11.5px !important;
+    gap: 8px !important;
+    padding: 11px 12px !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .admin-sidebar-bottom > button:first-child {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+  }
+
+  .admin-sidebar-bottom > button:first-child:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .admin-sidebar-bottom > button:last-child {
+    background: rgba(239, 68, 68, 0.12) !important;
+    border: 1px solid rgba(239, 68, 68, 0.25) !important;
+    color: #ef4444 !important;
+  }
+
+  .admin-sidebar-bottom > button:last-child:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
   }
 
   .admin-sidebar-backdrop {
@@ -1423,8 +1457,8 @@
     position: fixed !important;
     inset: 0 !important;
     background: rgba(0, 0, 0, 0.8) !important;
-    backdrop-filter: blur(6px) !important;
-    -webkit-backdrop-filter: blur(6px) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
     z-index: 1040 !important;
     animation: admin-fade-in 0.2s ease;
   }
@@ -1433,8 +1467,8 @@
     display: flex !important;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.14);
@@ -1452,11 +1486,91 @@
   .admin-main {
     height: calc(100vh - 56px) !important;
     height: calc(100dvh - 56px) !important;
-    padding: 20px 16px 40px !important;
+    padding: 16px 14px 44px !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
+  }
+
+  /* Hero Banner matching Screenshot 1 */
+  .admin-hero-banner {
+    padding: 22px 18px !important;
+    border-radius: 20px !important;
+    background: #111116 !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    margin-bottom: 14px !important;
+  }
+
+  .admin-hero-banner h1 {
+    font-size: 22px !important;
+    font-weight: 900 !important;
+    color: #ffffff !important;
+    margin: 0 0 6px !important;
+    font-family: 'Chakra Petch', sans-serif !important;
+  }
+
+  .admin-hero-banner p {
+    font-size: 12px !important;
+    color: rgba(255, 255, 255, 0.45) !important;
+    line-height: 1.45 !important;
+    margin: 0 !important;
+  }
+
+  /* 4 Stats Grid (2x2 on mobile matching Screenshot 1) */
+  .admin-stats-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .admin-stats-grid .admin-glass-card {
+    padding: 16px 14px !important;
+    border-radius: 16px !important;
+    background: #111116 !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+  }
+
+  .admin-stats-grid .admin-glass-card span:first-child {
+    font-size: 9.5px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.1em !important;
+    color: rgba(255, 255, 255, 0.4) !important;
+    text-transform: uppercase !important;
+    margin-bottom: 8px !important;
+  }
+
+  .admin-stats-grid .admin-glass-card span:last-child {
+    font-size: 20px !important;
+    font-weight: 900 !important;
+    line-height: 1.1 !important;
+  }
+
+  /* Quick Guide Container matching Screenshot 1 */
+  .admin-quickguide-card {
+    padding: 20px 16px !important;
+    border-radius: 20px !important;
+    background: #111116 !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  }
+
+  /* Shortcuts Grid (1 column stack matching Screenshot 1) */
+  .admin-shortcuts-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .admin-shortcuts-grid > div {
+    padding: 18px 16px !important;
+    border-radius: 16px !important;
+    background: #14141a !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    transition: all 0.2s ease !important;
   }
 
   .admin-member-actions {
