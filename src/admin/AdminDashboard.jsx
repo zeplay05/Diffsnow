@@ -340,9 +340,22 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     if (!acceptTarget) return;
     const newMember = await acceptJoinRequest(acceptTarget.id, acceptRank, acceptCustomRole);
     if (newMember) {
-      const currentList = rosterData['members'] || [];
-      const updatedList = [newMember, ...currentList];
-      saveEntries(updatedList);
+      if (!newMember.imageUrl && !newMember.avatar) {
+        newMember.imageUrl = logoImg;
+        newMember.avatar = logoImg;
+      }
+      let currentList = rosterData['members'] || [];
+      try {
+        const freshList = await fetchRosterEntries();
+        if (Array.isArray(freshList) && freshList.length > 0) {
+          currentList = freshList;
+        }
+      } catch (e) {
+        console.warn('Fetch roster before accept error:', e);
+      }
+      const filtered = currentList.filter(m => (m.name || m.username) !== newMember.name && String(m.id) !== String(newMember.id));
+      const updatedList = [...filtered, newMember];
+      await saveEntries(updatedList, 'members');
       setJoinRequests(await fetchJoinRequests());
     }
     setShowAcceptModal(false);
@@ -528,16 +541,16 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
   const [partnerForm, setPartnerForm] = useState({ name: '', url: '' });
 
   // Persist members when updated
-  const saveEntries = async (newEntries) => {
-    if (!currentRoster) return;
-    setRosterData(prev => ({ ...prev, [currentRoster.id]: newEntries }));
-    await saveRosterMembers(currentRoster.id, newEntries);
+  const saveEntries = async (newEntries, targetRosterId) => {
+    const rosterId = targetRosterId || currentRoster?.id || 'members';
+    setRosterData(prev => ({ ...prev, [rosterId]: newEntries }));
+    await saveRosterMembers(rosterId, newEntries);
 
     // Save directly into diffsnow_roster_data & triples_members_members for public pages
     try {
       localStorage.setItem('diffsnow_roster_data', JSON.stringify(newEntries));
       localStorage.setItem('triples_members_members', JSON.stringify(newEntries));
-      localStorage.setItem(`triples_members_${currentRoster.id}`, JSON.stringify(newEntries));
+      localStorage.setItem(`triples_members_${rosterId}`, JSON.stringify(newEntries));
     } catch (e) {
       console.warn('LocalStorage save error:', e);
     }

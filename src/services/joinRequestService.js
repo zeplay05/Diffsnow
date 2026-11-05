@@ -89,17 +89,17 @@ export const acceptJoinRequest = async (requestId, rankOrder = '4', customRole =
   // Build a roster entry from the request data
   const memberEntry = {
     id: `mem-${Date.now()}`,
-    name: req.facebookName || 'Unknown',
-    username: req.facebookName || 'Unknown',
+    name: req.facebookName || req.name || 'Unknown',
+    username: req.facebookName || req.name || 'Unknown',
     role: role,
     status: role.toLowerCase(),
     rankOrder: rankNumber,
     facebook: req.facebookUrl || '',
     socialLink: req.facebookUrl || '',
     social: req.facebookUrl || '',
-    avatar: '',
-    imageUrl: '',
-    facebookName: req.facebookName || '',
+    avatar: '/asset/LOGO DIFFSNOW.png',
+    imageUrl: '/asset/LOGO DIFFSNOW.png',
+    facebookName: req.facebookName || req.name || '',
     fromRequest: requestId,
     joinedAt: new Date().toISOString()
   };
