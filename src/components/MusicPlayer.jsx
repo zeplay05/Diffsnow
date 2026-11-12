@@ -1,11 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-// Extract YouTube video ID
+// Extract YouTube video ID (supports youtu.be, watch?v=, embed, shorts, music.youtube, and raw IDs)
 export const getYouTubeVideoId = (url) => {
   if (!url) return null;
-  const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-  const match = String(url).match(regExp);
-  return (match && match[2].length === 11) ? match[2] : null;
+  const clean = String(url).trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(clean)) return clean;
+  const regExp = /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|watch\?v=|watch\?.+&v=))([\w-]{11})/;
+  const match = clean.match(regExp);
+  if (match && match[1]) return match[1];
+  const fallback = clean.match(/v=([\w-]{11})/);
+  return fallback ? fallback[1] : null;
 };
 
 // Extract start time in seconds (e.g. t=13s, start=13, or default 13 for 6MCiaKFkhfg)
@@ -77,16 +81,18 @@ export const MusicPlayer = ({ isPreview = false, previewLayout, previewUrl, prev
   // settings. Local storage remains only as an offline fallback.
   useEffect(() => {
     if (isPreview || !settings) return;
-    setMusicUrl(cleanMusicUrl(settings.url));
-    setVolume(Number(settings.volume) || 80);
-    setLayout(settings.layout || 'STANDARD');
+    const effectiveUrl = settings.url || localStorage.getItem('diffsnow_music_url') || localStorage.getItem('triples_music_url');
+    if (effectiveUrl) setMusicUrl(cleanMusicUrl(effectiveUrl));
+    if (settings.volume !== undefined) setVolume(Number(settings.volume));
+    if (settings.layout) setLayout(settings.layout);
   }, [settings, isPreview]);
 
   useEffect(() => {
     const handleStorage = () => {
       if (!previewLayout) setLayout(localStorage.getItem('diffsnow_music_layout') || localStorage.getItem('triples_music_layout') || 'STANDARD');
       if (!previewUrl) {
-        setMusicUrl(cleanMusicUrl(localStorage.getItem('diffsnow_music_url') || localStorage.getItem('triples_music_url')));
+        const storedUrl = localStorage.getItem('diffsnow_music_url') || localStorage.getItem('triples_music_url');
+        if (storedUrl) setMusicUrl(cleanMusicUrl(storedUrl));
       }
       if (previewVolume === undefined) {
         const v = Number(localStorage.getItem('diffsnow_music_volume') || localStorage.getItem('triples_music_volume') || 80);
@@ -125,7 +131,7 @@ export const MusicPlayer = ({ isPreview = false, previewLayout, previewUrl, prev
       .then(data => {
         if (data && data.title) {
           let title = data.title;
-          let artist = data.author_name || 'Ariana Grande';
+          let artist = data.author_name || 'YouTube Music';
 
           if (title.includes(' - ')) {
             const parts = title.split(' - ');
@@ -142,8 +148,8 @@ export const MusicPlayer = ({ isPreview = false, previewLayout, previewUrl, prev
         }
       })
       .catch(() => {
-        setTrackTitle('bye (Altare remix)');
-        setTrackArtist('Ariana Grande');
+        setTrackTitle('Audio Track');
+        setTrackArtist('YouTube');
       });
   }, [ytVideoId]);
 
@@ -1535,6 +1541,7 @@ export const MusicPlayer = ({ isPreview = false, previewLayout, previewUrl, prev
       {/* Hidden YouTube IFrame Player (Only on Live Public Site) */}
       {ytVideoId && !isPreview && (
         <iframe
+          key={ytVideoId}
           ref={iframeRef}
           title="YouTube Audio Player"
           width="1"

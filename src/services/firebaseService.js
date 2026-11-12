@@ -70,43 +70,73 @@ export const saveFirebaseConfig = (config) => {
 
 // Music settings are shared so visitors see the admin-selected track and UI.
 export const fetchSharedMusicSettings = async () => {
+  const localUrl = typeof window !== 'undefined'
+    ? (localStorage.getItem('diffsnow_music_url') || localStorage.getItem('triples_music_url') || '')
+    : '';
+  const localVol = typeof window !== 'undefined'
+    ? Number(localStorage.getItem('diffsnow_music_volume') || localStorage.getItem('triples_music_volume') || 50)
+    : 50;
+  const localLayout = typeof window !== 'undefined'
+    ? (localStorage.getItem('diffsnow_music_layout') || localStorage.getItem('triples_music_layout') || 'STANDARD')
+    : 'STANDARD';
+
+  const localFallback = {
+    url: localUrl || DEFAULT_MUSIC_SETTINGS.url,
+    volume: localVol,
+    layout: localLayout
+  };
+
   const { dbUrl, secretToken } = getFirebaseConfig();
-  if (!dbUrl) return DEFAULT_MUSIC_SETTINGS;
+  if (!dbUrl) return localFallback;
 
   try {
     let url = `${dbUrl.replace(/\/$/, '')}/siteSettings/music.json`;
     if (secretToken) url += `?auth=${secretToken}`;
     const response = await fetch(url);
-    if (!response.ok) return null;
+    if (!response.ok) return localFallback;
     const saved = await response.json();
-    if (!saved) return null;
+    if (!saved || typeof saved !== 'object' || saved.error) return localFallback;
     return {
-      url: saved?.url || DEFAULT_MUSIC_SETTINGS.url,
-      volume: Number.isFinite(Number(saved?.volume)) ? Number(saved.volume) : DEFAULT_MUSIC_SETTINGS.volume,
-      layout: saved?.layout || DEFAULT_MUSIC_SETTINGS.layout
+      url: saved?.url || localFallback.url,
+      volume: Number.isFinite(Number(saved?.volume)) ? Number(saved.volume) : localFallback.volume,
+      layout: saved?.layout || localFallback.layout
     };
   } catch {
-    return null;
+    return localFallback;
   }
 };
 
 export const saveSharedMusicSettings = async (settings) => {
-  const { dbUrl, secretToken } = getFirebaseConfig();
   const next = {
     url: settings.url || DEFAULT_MUSIC_SETTINGS.url,
     volume: Number(settings.volume) || DEFAULT_MUSIC_SETTINGS.volume,
     layout: settings.layout || DEFAULT_MUSIC_SETTINGS.layout
   };
+
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('diffsnow_music_url', next.url);
+    localStorage.setItem('triples_music_url', next.url);
+    localStorage.setItem('diffsnow_music_volume', String(next.volume));
+    localStorage.setItem('triples_music_volume', String(next.volume));
+    localStorage.setItem('diffsnow_music_layout', next.layout);
+    localStorage.setItem('triples_music_layout', next.layout);
+  }
+
+  const { dbUrl, secretToken } = getFirebaseConfig();
   if (!dbUrl) return next;
 
-  let url = `${dbUrl.replace(/\/$/, '')}/siteSettings/music.json`;
-  if (secretToken) url += `?auth=${secretToken}`;
-  const response = await fetch(url, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(next)
-  });
-  if (!response.ok) throw new Error('Unable to save shared music settings');
+  try {
+    let url = `${dbUrl.replace(/\/$/, '')}/siteSettings/music.json`;
+    if (secretToken) url += `?auth=${secretToken}`;
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(next)
+    });
+    if (!response.ok) console.warn('Could not sync music to Firebase, kept locally');
+  } catch (e) {
+    console.warn('Firebase music save network warning:', e);
+  }
   return next;
 };
 

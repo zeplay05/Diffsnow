@@ -15,7 +15,7 @@ import {
   rejectJoinRequest,
   deleteJoinRequest
 } from '../services/joinRequestService';
-import { getFirebaseConfig, fetchRosterEntries } from '../services/firebaseService';
+import { getFirebaseConfig, fetchRosterEntries, saveSharedMusicSettings } from '../services/firebaseService';
 import './admin.css';
 
 // ─── Icons (inline SVG) ───────────────────────────────────────────────────────
@@ -214,7 +214,7 @@ function SectionHeader({ icon, title, iconColor, iconBg }) {
 }
 
 // ─── Main Triples Admin Component ─────────────────────────────────────────────
-export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData }) {
+export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData, onSaveMusicSettings, musicSettings }) {
   const [tab, setTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => {
@@ -476,11 +476,13 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
 
   // Music State
   const [musicUrl, setMusicUrl] = useState(() => {
-    const saved = localStorage.getItem('triples_music_url') || localStorage.getItem('diffsnow_music_url');
-    if (saved === null || saved.trim() === '' || saved.includes('szpLnpkuKr8') || saved.includes('3pC31F2ijrM')) {
+    const fromProps = musicSettings?.url;
+    const saved = localStorage.getItem('diffsnow_music_url') || localStorage.getItem('triples_music_url');
+    const candidate = fromProps || saved;
+    if (!candidate || candidate.trim() === '' || candidate.includes('szpLnpkuKr8') || candidate.includes('3pC31F2ijrM')) {
       return 'https://www.youtube.com/watch?v=6MCiaKFkhfg&t=13s';
     }
-    return saved;
+    return candidate;
   });
   const [musicVolume, setMusicVolume] = useState(() => Number(localStorage.getItem('triples_music_volume') || 50));
   const [musicLayout, setMusicLayout] = useState(() => localStorage.getItem('triples_music_layout') || 'STANDARD');
@@ -846,7 +848,7 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
   };
 
   // Music Save
-  const handleSaveMusic = () => {
+  const handleSaveMusic = async () => {
     const cleanUrl = (musicUrl || '').trim();
     localStorage.setItem('triples_music_url', cleanUrl);
     localStorage.setItem('diffsnow_music_url', cleanUrl);
@@ -854,8 +856,32 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     localStorage.setItem('diffsnow_music_volume', String(musicVolume));
     localStorage.setItem('triples_music_layout', musicLayout);
     localStorage.setItem('diffsnow_music_layout', musicLayout);
+
+    if (onSaveMusicSettings) {
+      try {
+        await onSaveMusicSettings({
+          url: cleanUrl,
+          volume: musicVolume,
+          layout: musicLayout
+        });
+      } catch (err) {
+        console.warn('onSaveMusicSettings warning:', err);
+      }
+    } else {
+      try {
+        await saveSharedMusicSettings({
+          url: cleanUrl,
+          volume: musicVolume,
+          layout: musicLayout
+        });
+      } catch (err) {
+        console.warn('saveSharedMusicSettings warning:', err);
+      }
+    }
+
     window.dispatchEvent(new Event('triples_music_updated'));
     window.dispatchEvent(new Event('diffsnow_music_updated'));
+    window.dispatchEvent(new Event('storage'));
     setMusicSaved(true);
     setTimeout(() => setMusicSaved(false), 3000);
   };
