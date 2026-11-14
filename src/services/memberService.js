@@ -1,15 +1,17 @@
-// ─── Pure Static Member Service (Frontend Static สำหรับ Vercel) ────────────────
-const defaultData = { data: {} };
+import { DEFAULT_DIFFSNOW_MEMBERS } from './firebaseService';
 
-// รายชื่อผู้ก่อตั้ง 6 คนที่ยศต้องเป็น HEAD (Rank 1) ตลอดกาล ห้ามเปลี่ยน
+// ─── Pure Static Member Service (Frontend Static สำหรับ Vercel) ────────────────
+const defaultData = {
+  data: {
+    members: DEFAULT_DIFFSNOW_MEMBERS,
+    diffsnow: DEFAULT_DIFFSNOW_MEMBERS
+  }
+};
+
+// รายชื่อผู้ก่อตั้งที่ยศต้องเป็น HEAD (Rank 1) ตลอดกาล ห้ามเปลี่ยน
 export const FIXED_HEAD_NAMES = [
-  'awake unfair',
-  'rix triples',
-  'summer triples',
-  'song triples',
-  'yawhan triples',
-  'normal triples',
-]
+  'gojo winterfell',
+];
 
 // Key mapping สำหรับกลุ่มสมาชิกทั้งหมด (รองรับทั้งตัวพิมพ์ใหญ่และตัวพิมพ์เล็ก)
 export const ROSTER_KEYS = {

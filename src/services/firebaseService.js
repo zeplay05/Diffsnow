@@ -31,8 +31,91 @@ export const DEFAULT_UI_SETTINGS = {
   theme: 'Apex Azure'
 };
 
-// Initial roster is completely empty per user request
-const INITIAL_ROSTER = [];
+export const DEFAULT_DIFFSNOW_MEMBERS = [
+  {
+    id: 1793903329643,
+    name: 'Gojo Winterfell',
+    username: 'Gojo Winterfell',
+    role: 'Head',
+    rankOrder: '1',
+    avatar: '/asset/LOGO DIFFSNOW.png',
+    imageUrl: '/asset/LOGO DIFFSNOW.png',
+    facebook: 'https://www.facebook.com/gojo.winterfell',
+    socialLink: 'https://www.facebook.com/gojo.winterfell',
+    instagram: '',
+    tiktok: '',
+    kick: '',
+    youtube: '',
+    profileEmail: ''
+  },
+  {
+    id: 1793904527339,
+    name: 'Dajack Hydra',
+    username: 'Dajack Hydra',
+    role: 'Leader',
+    rankOrder: '2',
+    avatar: '/asset/LOGO DIFFSNOW.png',
+    imageUrl: '/asset/LOGO DIFFSNOW.png',
+    facebook: 'https://www.facebook.com/jackwinterfellhydra?locale=th_TH',
+    socialLink: 'https://www.facebook.com/jackwinterfellhydra?locale=th_TH',
+    instagram: '',
+    tiktok: '',
+    kick: '',
+    youtube: '',
+    profileEmail: ''
+  },
+  {
+    id: 1793909008897,
+    name: 'Mewie Conquers',
+    username: 'Mewie Conquers',
+    role: 'Supporter',
+    rankOrder: '3',
+    avatar: 'https://files.kick.com/images/user/124842993/profile_image/conversion/09d95ba5-beda-44da-9dd7-070a0f0ce79d-fullsize.webp',
+    imageUrl: 'https://files.kick.com/images/user/124842993/profile_image/conversion/09d95ba5-beda-44da-9dd7-070a0f0ce79d-fullsize.webp',
+    facebook: 'https://www.facebook.com/mewie.zera',
+    socialLink: 'https://www.facebook.com/mewie.zera',
+    instagram: 'https://www.instagram.com/jmewpp/',
+    kick: 'https://kick.com/jmewpp',
+    tiktok: 'https://www.tiktok.com/@mewie_05',
+    youtube: '',
+    profileEmail: ''
+  },
+  {
+    id: 1793909333351,
+    name: 'Hades Winterfell',
+    username: 'Hades Winterfell',
+    role: 'Supporter',
+    rankOrder: '3',
+    avatar: '/asset/LOGO DIFFSNOW.png',
+    imageUrl: '/asset/LOGO DIFFSNOW.png',
+    facebook: 'https://www.facebook.com/hadessmp?locale=th_TH',
+    socialLink: 'https://www.facebook.com/hadessmp?locale=th_TH',
+    instagram: '',
+    tiktok: '',
+    kick: '',
+    youtube: '',
+    profileEmail: ''
+  },
+  {
+    id: 1793907267850,
+    name: 'Time SixdoubleEight',
+    username: 'Time SixdoubleEight',
+    role: 'Member',
+    rankOrder: '4',
+    avatar: '/asset/LOGO DIFFSNOW.png',
+    imageUrl: '/asset/LOGO DIFFSNOW.png',
+    facebook: 'https://www.facebook.com/share/1KWzxSLeKx/?mibextid=wwXIfr',
+    socialLink: 'https://www.facebook.com/share/1KWzxSLeKx/?mibextid=wwXIfr',
+    instagram: '',
+    tiktok: '',
+    kick: '',
+    youtube: '',
+    profileEmail: ''
+  }
+];
+
+// Initial roster seed
+const INITIAL_ROSTER = DEFAULT_DIFFSNOW_MEMBERS;
 
 export const getCenterLogoUrl = () => {
   return localStorage.getItem(LOGO_URL_KEY) || "/asset/diffsnow-logo.png";
