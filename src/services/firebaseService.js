@@ -1,12 +1,14 @@
 // Firebase Realtime Database & Local Storage Backend Service (REST API Native)
+export const FIREBASE_WEB_API_KEY = 'AIzaSyCqAucea-F80o3KPBtzz4Pdl5xvqMu18YM';
+
 const firebaseConfig = {
-  apiKey: '',
-  authDomain: '',
-  projectId: '',
-  storageBucket: '',
-  messagingSenderId: '',
+  apiKey: FIREBASE_WEB_API_KEY,
+  authDomain: 'diffsnow-database.firebaseapp.com',
+  projectId: 'diffsnow-database',
+  storageBucket: 'diffsnow-database.appspot.com',
+  messagingSenderId: '285926538651',
   appId: '',
-  databaseURL: ''
+  databaseURL: 'https://diffsnow-database-default-rtdb.asia-southeast1.firebasedatabase.app'
 };
 
 export const db = null;
@@ -127,10 +129,115 @@ export const saveCenterLogoUrl = (url) => {
 
 export const DEFAULT_FIREBASE_URL = 'https://diffsnow-database-default-rtdb.asia-southeast1.firebasedatabase.app';
 
+// ─── Firebase Authentication (Email/Password Admin Login) ────────────────────
+export const loginFirebaseAuth = async (email, password) => {
+  const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_WEB_API_KEY}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: email.trim(),
+      password,
+      returnSecureToken: true
+    })
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    const errorMsg = data?.error?.message || 'LOGIN_FAILED';
+    throw new Error(errorMsg);
+  }
+
+  const { idToken, refreshToken, expiresIn, email: authedEmail } = data;
+  const expiresAt = Date.now() + (Number(expiresIn) || 3600) * 1000;
+
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('diffsnow_fb_id_token', idToken);
+    localStorage.setItem('diffsnow_fb_refresh_token', refreshToken);
+    localStorage.setItem('diffsnow_fb_token_expires', String(expiresAt));
+    localStorage.setItem('diffsnow_fb_admin_email', authedEmail || email.trim());
+    localStorage.setItem('diffsnow_fb_secret', idToken);
+    localStorage.setItem('triples_fb_secret', idToken);
+  }
+
+  return { idToken, email: authedEmail, expiresAt };
+};
+
+export const logoutFirebaseAuth = () => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('diffsnow_fb_id_token');
+    localStorage.removeItem('diffsnow_fb_refresh_token');
+    localStorage.removeItem('diffsnow_fb_token_expires');
+    localStorage.removeItem('diffsnow_fb_admin_email');
+    localStorage.removeItem('diffsnow_fb_secret');
+    localStorage.removeItem('triples_fb_secret');
+  }
+};
+
+export const getFirebaseAuthUser = () => {
+  if (typeof window === 'undefined') return { email: '', token: '', authed: false };
+  const token = localStorage.getItem('diffsnow_fb_id_token');
+  const email = localStorage.getItem('diffsnow_fb_admin_email') || 'admin@diffsnow.com';
+  const expiresAt = Number(localStorage.getItem('diffsnow_fb_token_expires') || 0);
+
+  if (token && Date.now() < expiresAt) {
+    return { email, token, authed: true };
+  }
+  return { email, token: token || '', authed: Boolean(token) };
+};
+
+export const refreshFirebaseAuthToken = async () => {
+  if (typeof window === 'undefined') return null;
+  const refreshToken = localStorage.getItem('diffsnow_fb_refresh_token');
+  if (!refreshToken) return null;
+
+  try {
+    const url = `https://securetoken.googleapis.com/v1/token?key=${FIREBASE_WEB_API_KEY}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    const idToken = data.id_token;
+    const newRefreshToken = data.refresh_token;
+    const expiresIn = Number(data.expires_in) || 3600;
+    const expiresAt = Date.now() + expiresIn * 1000;
+
+    localStorage.setItem('diffsnow_fb_id_token', idToken);
+    localStorage.setItem('diffsnow_fb_refresh_token', newRefreshToken);
+    localStorage.setItem('diffsnow_fb_token_expires', String(expiresAt));
+    localStorage.setItem('diffsnow_fb_secret', idToken);
+    localStorage.setItem('triples_fb_secret', idToken);
+
+    return idToken;
+  } catch (e) {
+    console.warn('Failed to refresh Firebase Auth token:', e);
+    return null;
+  }
+};
+
 export const getFirebaseConfig = () => {
+  let activeToken = '';
+
+  if (typeof window !== 'undefined') {
+    const idToken = localStorage.getItem('diffsnow_fb_id_token') || '';
+    const expiresAt = Number(localStorage.getItem('diffsnow_fb_token_expires') || 0);
+    const legacySecret = localStorage.getItem('diffsnow_fb_secret') || localStorage.getItem('triples_fb_secret') || '';
+
+    // If ID token is close to expiry (within 2 minutes), trigger refresh in background
+    if (idToken && Date.now() >= expiresAt - 120000) {
+      refreshFirebaseAuthToken().catch(() => {});
+    }
+
+    activeToken = idToken || legacySecret;
+  }
+
   const defaults = {
     dbUrl: DEFAULT_FIREBASE_URL,
-    secretToken: ''
+    secretToken: activeToken
   };
 
   try {
@@ -140,7 +247,7 @@ export const getFirebaseConfig = () => {
     const parsed = JSON.parse(saved);
     return {
       dbUrl: parsed.dbUrl || DEFAULT_FIREBASE_URL,
-      secretToken: parsed.secretToken || ''
+      secretToken: activeToken || parsed.secretToken || ''
     };
   } catch (e) {
     return defaults;

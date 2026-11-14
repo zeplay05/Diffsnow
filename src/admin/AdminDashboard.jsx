@@ -15,7 +15,14 @@ import {
   rejectJoinRequest,
   deleteJoinRequest
 } from '../services/joinRequestService';
-import { getFirebaseConfig, fetchRosterEntries, saveSharedMusicSettings } from '../services/firebaseService';
+import {
+  getFirebaseConfig,
+  fetchRosterEntries,
+  saveSharedMusicSettings,
+  loginFirebaseAuth,
+  logoutFirebaseAuth,
+  getFirebaseAuthUser
+} from '../services/firebaseService';
 import './admin.css';
 
 // ─── Icons (inline SVG) ───────────────────────────────────────────────────────
@@ -321,6 +328,13 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
   const [fbMessage, setFbMessage] = useState('');
   const [fbLoading, setFbLoading] = useState(false);
 
+  // Firebase Authentication State
+  const [authEmail, setAuthEmail] = useState(() => localStorage.getItem('diffsnow_fb_admin_email') || 'admin@diffsnow.com');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authUser, setAuthUser] = useState(() => getFirebaseAuthUser());
+  const [authError, setAuthError] = useState('');
+
   // Join Requests State (เมนูคำขอ)
   const [joinRequests, setJoinRequests] = useState(() => getJoinRequests());
   const [showAcceptModal, setShowAcceptModal] = useState(false);
@@ -433,6 +447,47 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     }
   };
 
+  const handleFirebaseAuthLogin = async (e) => {
+    if (e) e.preventDefault();
+    if (!authPassword) {
+      setAuthError('กรุณากรอกรหัสผ่านบัญชีแอดมิน');
+      return;
+    }
+    setAuthLoading(true);
+    setAuthError('');
+    try {
+      const res = await loginFirebaseAuth(authEmail, authPassword);
+      setAuthUser({ email: res.email, token: res.idToken, authed: true });
+      setFbSecretToken(res.idToken);
+      setAuthPassword('');
+      setFbStatus('success');
+      setFbMessage('✓ ยืนยันตัวตนแอดมินสำเร็จ! กำลังซิงค์ข้อมูลขึ้น Firebase Cloud...');
+      
+      setTimeout(async () => {
+        await handleSyncToFirebase();
+      }, 100);
+    } catch (err) {
+      console.error(err);
+      if (err.message.includes('INVALID_LOGIN_CREDENTIALS') || err.message.includes('INVALID_PASSWORD')) {
+        setAuthError('รหัสผ่านไม่ถูกต้อง โปรดตรวจสอบรหัสผ่านของบัญชีแอดมินที่สร้างใน Firebase');
+      } else if (err.message.includes('USER_NOT_FOUND')) {
+        setAuthError(`ไม่พบบัญชี ${authEmail} ใน Firebase Authentication`);
+      } else {
+        setAuthError(`เข้าสู่ระบบไม่สำเร็จ: ${err.message}`);
+      }
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleFirebaseAuthLogout = () => {
+    logoutFirebaseAuth();
+    setAuthUser({ email: '', token: '', authed: false });
+    setFbSecretToken('');
+    setFbMessage('ออกจากระบบแอดมิน Firebase เรียบร้อย');
+    setTimeout(() => setFbMessage(''), 3000);
+  };
+
   const handleSyncToFirebase = async () => {
     if (!fbUrl.trim()) {
       setFbStatus('error');
@@ -444,11 +499,13 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     setFbMessage('กำลังเชื่อมต่อและซิงค์ข้อมูลขึ้น Firebase Realtime Database...');
 
     const cleanUrl = fbUrl.trim().replace(/\/$/, '');
-    const cleanToken = fbSecretToken.trim();
+    const cleanToken = (authUser?.token && authUser.token.trim()) || fbSecretToken.trim();
     localStorage.setItem('triples_fb_url', cleanUrl);
-    localStorage.setItem('triples_fb_secret', cleanToken);
     localStorage.setItem('diffsnow_fb_url', cleanUrl);
-    localStorage.setItem('diffsnow_fb_secret', cleanToken);
+    if (cleanToken) {
+      localStorage.setItem('triples_fb_secret', cleanToken);
+      localStorage.setItem('diffsnow_fb_secret', cleanToken);
+    }
     localStorage.setItem('diffsnow_firebase_config', JSON.stringify({ dbUrl: cleanUrl, secretToken: cleanToken }));
 
     try {
@@ -469,7 +526,7 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
         if (res.status === 401 || res.status === 403 || errorData?.error?.toLowerCase?.().includes('permission denied')) {
-          throw new Error('Firebase ติดสิทธิ์ Permission Denied: กฎ Security Rules บล็อกการเขียน (ให้คัดลอก Database Secret จาก Firebase Console มาใส่ในช่อง 2. ด้านบน หรือตั้งค่า Rules ให้ถูกต้อง)');
+          throw new Error('Firebase ติดสิทธิ์ Permission Denied: กฎ Security Rules บล็อกการเขียน (โปรดกรอกรหัสผ่านเข้าสู่ระบบแอดมินในกล่องด้านล่าง)');
         }
         throw new Error(`HTTP Error ${res.status}: ${res.statusText}`);
       }
@@ -498,7 +555,7 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     } catch (err) {
       console.error(err);
       setFbStatus('error');
-      setFbMessage(`การเชื่อมต่อ Firebase ล้มเหลว: ${err.message || 'โปรดตรวจสอบ Database URL และ Database Secret'}`);
+      setFbMessage(`การเชื่อมต่อ Firebase ล้มเหลว: ${err.message || 'โปรดตรวจสอบ Database URL และ รหัสผ่านแอดมิน'}`);
     } finally {
       setFbLoading(false);
     }
@@ -2015,28 +2072,152 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
                   </div>
                 </div>
 
-                <div>
-                  <label style={{ fontSize: '11px', fontWeight: '800', color: '#fcd34d', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '6px' }}>
-                    2. DATABASE SECRET / AUTH TOKEN (อุปกรณ์เสริม / OPTIONAL)
-                  </label>
-                  <input
-                    type="password"
-                    value={fbSecretToken}
-                    onChange={e => setFbSecretToken(e.target.value)}
-                    placeholder="ใส่ Database Secret หากเปิด Rules เป็นแบบจำกัดสิทธิ์..."
-                    style={{
-                      width: '100%',
-                      background: 'rgba(0,0,0,0.4)',
-                      border: '1px solid rgba(245,158,11,0.25)',
-                      borderRadius: '12px',
-                      padding: '12px 16px',
-                      color: '#ffffff',
-                      fontSize: '13px',
-                      fontFamily: 'monospace',
-                      boxSizing: 'border-box',
-                      outline: 'none'
-                    }}
-                  />
+                {/* 2. Firebase Admin Authentication */}
+                <div style={{
+                  background: authUser.authed
+                    ? 'linear-gradient(135deg, rgba(34,197,94,0.12) 0%, rgba(15,23,42,0.7) 100%)'
+                    : 'linear-gradient(135deg, rgba(56,189,248,0.1) 0%, rgba(15,23,42,0.7) 100%)',
+                  border: authUser.authed ? '1.5px solid rgba(34,197,94,0.45)' : '1px solid rgba(56,189,248,0.3)',
+                  borderRadius: '16px',
+                  padding: '20px',
+                  boxShadow: authUser.authed ? '0 4px 20px rgba(34,197,94,0.15)' : 'none'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '18px' }}>🔐</span>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: '800', color: '#fff', letterSpacing: '0.04em' }}>
+                          2. ยืนยันตัวตนแอดมิน (FIREBASE AUTHENTICATION)
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)', marginTop: '2px' }}>
+                          เข้าสู่ระบบด้วยบัญชีแอดมินเพื่อปลดล็อกสิทธิ์บันทึก/แก้ไขข้อมูล และป้องกันคนนอก 100%
+                        </div>
+                      </div>
+                    </div>
+
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '4px 10px',
+                      borderRadius: '20px',
+                      fontSize: '11px',
+                      fontWeight: '800',
+                      background: authUser.authed ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.15)',
+                      color: authUser.authed ? '#4ade80' : '#f87171',
+                      border: authUser.authed ? '1px solid rgba(34,197,94,0.4)' : '1px solid rgba(239,68,68,0.3)'
+                    }}>
+                      <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: authUser.authed ? '#4ade80' : '#ef4444' }} />
+                      {authUser.authed ? 'ยืนยันตัวตนสำเร็จ (Authorized)' : 'ยังไม่ยืนยันตัวตน'}
+                    </span>
+                  </div>
+
+                  {authUser.authed ? (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', background: 'rgba(0,0,0,0.3)', padding: '12px 16px', borderRadius: '12px' }}>
+                      <div>
+                        <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }}>เข้าสู่ระบบในชื่อ:</div>
+                        <div style={{ fontSize: '14px', fontWeight: '800', color: '#38bdf8', marginTop: '2px' }}>{authUser.email}</div>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          type="button"
+                          onClick={handleFirebaseAuthLogout}
+                          style={{
+                            padding: '7px 14px',
+                            background: 'rgba(239,68,68,0.15)',
+                            color: '#ef4444',
+                            border: '1px solid rgba(239,68,68,0.3)',
+                            borderRadius: '8px',
+                            fontSize: '11px',
+                            fontWeight: '700',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          ออกจากระบบแอดมิน
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleFirebaseAuthLogin} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
+                        <div>
+                          <label style={{ fontSize: '10.5px', fontWeight: '800', color: '#94a3b8', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>
+                            อีเมลแอดมิน
+                          </label>
+                          <input
+                            type="email"
+                            value={authEmail}
+                            onChange={e => setAuthEmail(e.target.value)}
+                            placeholder="admin@diffsnow.com"
+                            style={{
+                              width: '100%',
+                              background: 'rgba(0,0,0,0.5)',
+                              border: '1px solid rgba(56,189,248,0.3)',
+                              borderRadius: '10px',
+                              padding: '10px 14px',
+                              color: '#fff',
+                              fontSize: '13px',
+                              boxSizing: 'border-box',
+                              outline: 'none'
+                            }}
+                          />
+                        </div>
+
+                        <div>
+                          <label style={{ fontSize: '10.5px', fontWeight: '800', color: '#94a3b8', display: 'block', marginBottom: '4px', textTransform: 'uppercase' }}>
+                            รหัสผ่านแอดมิน
+                          </label>
+                          <input
+                            type="password"
+                            value={authPassword}
+                            onChange={e => setAuthPassword(e.target.value)}
+                            placeholder="กรอกรหัสผ่านบัญชีแอดมิน..."
+                            style={{
+                              width: '100%',
+                              background: 'rgba(0,0,0,0.5)',
+                              border: '1px solid rgba(56,189,248,0.3)',
+                              borderRadius: '10px',
+                              padding: '10px 14px',
+                              color: '#fff',
+                              fontSize: '13px',
+                              boxSizing: 'border-box',
+                              outline: 'none'
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {authError && (
+                        <div style={{ color: '#fca5a5', fontSize: '12px', fontWeight: '700', padding: '8px 12px', background: 'rgba(239,68,68,0.15)', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.35)' }}>
+                          ⚠️ {authError}
+                        </div>
+                      )}
+
+                      <div style={{ marginTop: '4px' }}>
+                        <button
+                          type="submit"
+                          disabled={authLoading}
+                          style={{
+                            padding: '10px 20px',
+                            background: 'linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)',
+                            color: '#000',
+                            fontWeight: '900',
+                            border: 'none',
+                            borderRadius: '10px',
+                            fontSize: '12.5px',
+                            cursor: authLoading ? 'not-allowed' : 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            boxShadow: '0 4px 15px rgba(56,189,248,0.35)'
+                          }}
+                        >
+                          {authLoading ? 'กำลังเข้าสู่ระบบ...' : '🔑 เข้าสู่ระบบเพื่อเปิดสิทธิ์บันทึก Cloud'}
+                        </button>
+                      </div>
+                    </form>
+                  )}
                 </div>
 
                 {/* Actions */}
