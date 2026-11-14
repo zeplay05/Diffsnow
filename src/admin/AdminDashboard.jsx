@@ -2081,45 +2081,7 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
                   </div>
                 )}
 
-                {/* Important Rules Guide */}
-                <div style={{ marginTop: '20px', padding: '16px', background: 'rgba(56,189,248,0.06)', border: '1px solid rgba(56,189,248,0.25)', borderRadius: '14px' }}>
-                  <div style={{ fontSize: '13px', fontWeight: '800', color: '#38bdf8', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span>🛡️</span> กฎความปลอดภัย Rules (คนนอกส่งคำขอได้ แต่ห้ามแก้ไขหรือแอบดูข้อมูล)
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, marginBottom: '10px' }}>
-                    1. ไปที่ <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" style={{ color: '#38bdf8', textDecoration: 'underline' }}>Firebase Console</a> ➜ เลือกโปรเจกต์ ➜ <strong>Realtime Database</strong> ➜ แท็บ <strong>Rules (กฎ)</strong><br />
-                    2. วางโค้ดกฎความปลอดภัยด้านล่างนี้ (อนุญาตให้คนนอกส่งคำขอใหม่ได้เท่านั้น แต่ห้ามแก้ไข/ลบรายชื่อสมาชิก และห้ามคนนอกแอบดูคำขอคนอื่น) แล้วกด <strong>Publish</strong>:
-                  </div>
-                  <pre style={{ margin: '0 0 12px 0', padding: '12px 16px', background: '#0a0d14', borderRadius: '10px', border: '1px solid rgba(56,189,248,0.2)', color: '#7dd3fc', fontSize: '12px', fontFamily: 'monospace', overflowX: 'auto' }}>
-{`{
-  "rules": {
-    "roster": {
-      ".read": true,
-      ".write": "auth != null"
-    },
-    "siteSettings": {
-      ".read": true,
-      ".write": "auth != null"
-    },
-    "joinRequests": {
-      ".read": "auth != null",
-      ".write": "auth != null",
-      "$requestId": {
-        ".write": "!data.exists() && newData.exists()",
-        ".validate": "newData.hasChildren(['name', 'facebookUrl', 'status']) && newData.child('status').val() === 'pending'"
-      }
-    }
-  }
-}`}
-                  </pre>
-                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, background: 'rgba(0,0,0,0.35)', padding: '10px 12px', borderRadius: '8px' }}>
-                    🔑 <strong>วิธีเอา Database Secret มาใส่เพื่อปลดล็อกสิทธิ์บันทึกให้แอดมิน (ทำครั้งเดียว):</strong><br />
-                    1. ใน <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" style={{ color: '#38bdf8', textDecoration: 'underline' }}>Firebase Console</a> คลิกที่รูปฟันเฟือง ⚙️ (Project settings) มุมซ้ายบนข้าง Project Overview<br />
-                    2. เลือกแท็บ <strong>Service accounts</strong> ➜ คลิกเมนูย่อยซ้ายมือ <strong>Database secrets</strong><br />
-                    3. คลิก <strong>Show (แสดง)</strong> ➜ กด <strong>Copy (คัดลอก)</strong> แล้วนำรหัสมาวางในช่อง <strong>2. DATABASE SECRET / AUTH TOKEN</strong> ด้านบน<br />
-                    4. กดปุ่ม <strong>"บันทึก Firebase Config"</strong> และกด <strong>"ทดสอบการเชื่อมต่อ & ซิงค์ข้อมูลทั้งหมดขึ้น Firebase"</strong>
-                  </div>
-                </div>
+
               </div>
             </div>
           </div>
