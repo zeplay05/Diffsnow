@@ -451,6 +451,10 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
       });
 
       if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        if (res.status === 401 || res.status === 403 || errorData?.error?.toLowerCase?.().includes('permission denied')) {
+          throw new Error('Firebase ติดสิทธิ์ Permission Denied: กฎ Security Rules ใน Firebase Console ปิดอยู่ (วิธีแก้: ไปที่ Firebase Console -> Realtime Database -> Rules -> แก้เป็น .read: true, .write: true แล้วกด Publish)');
+        }
         throw new Error(`HTTP Error ${res.status}: ${res.statusText}`);
       }
 
@@ -2029,6 +2033,27 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
                     {fbMessage}
                   </div>
                 )}
+
+                {/* Important Rules Guide */}
+                <div style={{ marginTop: '20px', padding: '16px', background: 'rgba(56,189,248,0.06)', border: '1px solid rgba(56,189,248,0.25)', borderRadius: '14px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: '800', color: '#38bdf8', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span>⚡</span> วิธีแก้ปัญหาเมื่อส่งคำขอไม่สำเร็จ (Permission Denied)
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, marginBottom: '10px' }}>
+                    หากสมาชิกส่งคำขอเข้าร่วมแล้วขึ้นข้อผิดพลาด แสดงว่ากฎ <strong>Security Rules</strong> ใน Firebase Console ปิดอยู่ ให้เข้าไปแก้ไขดังนี้:<br />
+                    1. ไปที่ <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" style={{ color: '#38bdf8', textDecoration: 'underline' }}>Firebase Console</a> &gt; เลือกโปรเจกต์ของคุณ<br />
+                    2. เมนูซ้ายเลือก <strong>Realtime Database</strong> &gt; คลิกแท็บ <strong>Rules (กฎ)</strong><br />
+                    3. แทนที่โค้ดทั้งหมดด้วยโค้ดด้านล่างนี้ แล้วกดปุ่ม <strong>Publish (เผยแพร่)</strong>:
+                  </div>
+                  <pre style={{ margin: 0, padding: '12px 16px', background: '#0a0d14', borderRadius: '10px', border: '1px solid rgba(56,189,248,0.2)', color: '#7dd3fc', fontSize: '12px', fontFamily: 'monospace' }}>
+{`{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}`}
+                  </pre>
+                </div>
               </div>
             </div>
           </div>

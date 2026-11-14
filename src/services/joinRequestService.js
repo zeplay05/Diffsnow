@@ -60,10 +60,14 @@ export const submitJoinRequest = async (data) => {
     note: data.note || '',
     rejectedReason: ''
   };
-  // Do not report success until the shared database accepts the request.
-  await _syncToFirebase(newRequest);
+
+  // Always save locally first so request is never lost
   const requests = getJoinRequests();
   _saveAll([newRequest, ...requests.filter(request => request.id !== newRequest.id)]);
+
+  // Sync to Firebase (required so administrators on other devices can see it)
+  await _syncToFirebase(newRequest);
+
   return newRequest;
 };
 
@@ -134,7 +138,7 @@ export const deleteJoinRequest = async (requestId) => {
 // Sync a single request to Firebase (best-effort)
 const _syncToFirebase = async (request) => {
   const config = getFirebaseConfig();
-  if (!config?.dbUrl?.trim()) throw new Error('Firebase is not configured');
+  if (!config?.dbUrl?.trim()) return;
   let url = `${config.dbUrl.replace(/\/$/, '')}/joinRequests/${request.id}.json`;
   if (config.secretToken) url += `?auth=${config.secretToken}`;
   const response = await fetch(url, {
@@ -142,7 +146,13 @@ const _syncToFirebase = async (request) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request)
   });
-  if (!response.ok) throw new Error('Unable to submit join request');
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 401 || response.status === 403 || data?.error?.toLowerCase?.().includes('permission denied')) {
+      throw new Error('FIREBASE_PERMISSION_DENIED');
+    }
+    throw new Error('Unable to submit join request');
+  }
 };
 
 const _deleteFromFirebase = async (requestId) => {

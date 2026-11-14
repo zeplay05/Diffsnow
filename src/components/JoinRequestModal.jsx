@@ -95,9 +95,13 @@ export const JoinRequestModal = () => {
       });
       setSubmitting(false);
       setStep('success');
-    } catch {
+    } catch (err) {
       setSubmitting(false);
-      setFormError('ส่งคำขอไม่สำเร็จ โปรดตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง');
+      if (err?.message === 'FIREBASE_PERMISSION_DENIED') {
+        setFormError('ฐานข้อมูล Firebase ปิดการเข้าถึง (Permission Denied) — กรุณาให้แอดมินเข้าไปเปิดสิทธิ์ Rules: .read: true, .write: true ใน Firebase Console');
+      } else {
+        setFormError('ส่งคำขอไม่สำเร็จ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วลองอีกครั้ง');
+      }
     }
   };
 
