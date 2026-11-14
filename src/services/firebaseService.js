@@ -261,6 +261,33 @@ export const setAdminAuth = (isAuthed) => {
 export const fetchRosterEntries = async () => {
   const config = getFirebaseConfig();
   
+  // Read local cache first to protect against accidental overwrite
+  let localList = [];
+  try {
+    const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        localList = parsed;
+      } else if (parsed && typeof parsed === 'object') {
+        if (Array.isArray(parsed.members) && parsed.members.length > 0) localList = parsed.members;
+        else if (Array.isArray(parsed.diffsnow) && parsed.diffsnow.length > 0) localList = parsed.diffsnow;
+        else if (Array.isArray(parsed.data) && parsed.data.length > 0) localList = parsed.data;
+      }
+    }
+    if (localList.length === 0) {
+      const subCached = localStorage.getItem('triples_members_members') || localStorage.getItem('triples_members_diffsnow');
+      if (subCached) {
+        const parsedSub = JSON.parse(subCached);
+        if (Array.isArray(parsedSub) && parsedSub.length > 0) localList = parsedSub;
+      }
+    }
+  } catch (e) {
+    console.warn('LocalStorage read error:', e);
+  }
+
+  const isPendingSync = typeof window !== 'undefined' && localStorage.getItem('diffsnow_roster_pending_sync') === 'true';
+
   if (config.dbUrl && config.dbUrl.trim() !== '') {
     try {
       let url = `${config.dbUrl.replace(/\/$/, '')}/roster.json`;
@@ -284,6 +311,28 @@ export const fetchRosterEntries = async () => {
               list = Object.keys(data).map(key => ({ ...data[key], firebaseKey: key }));
             }
           }
+
+          // CRITICAL PROTECTION:
+          // If the user recently imported or modified members locally (pending sync),
+          // and Firebase returns fewer/stale members because previous write was rejected or not synced,
+          // DO NOT overwrite the user's imported roster!
+          if (isPendingSync && localList.length > list.length) {
+            console.info(`Preserving local pending roster (${localList.length} members) over stale Firebase data (${list.length} members)`);
+            // If secret token is now provided, try auto-pushing to Firebase
+            if (config.secretToken) {
+              fetch(url, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(localList)
+              }).then(r => {
+                if (r.ok) {
+                  localStorage.removeItem('diffsnow_roster_pending_sync');
+                  console.info('Auto-synced pending local roster to Firebase successfully');
+                }
+              }).catch(() => {});
+            }
+            return localList;
+          }
           
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(list));
           return list;
@@ -294,31 +343,8 @@ export const fetchRosterEntries = async () => {
     }
   }
 
-  // LocalStorage fallback (reads array or object formats, plus sub-keys)
-  try {
-    const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
-      }
-      if (parsed && typeof parsed === 'object') {
-        if (Array.isArray(parsed.members) && parsed.members.length > 0) return parsed.members;
-        if (Array.isArray(parsed.diffsnow) && parsed.diffsnow.length > 0) return parsed.diffsnow;
-        if (Array.isArray(parsed.data) && parsed.data.length > 0) return parsed.data;
-      }
-    }
-
-    const subCached = localStorage.getItem('triples_members_members') || localStorage.getItem('triples_members_diffsnow');
-    if (subCached) {
-      const parsedSub = JSON.parse(subCached);
-      if (Array.isArray(parsedSub) && parsedSub.length > 0) {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(parsedSub));
-        return parsedSub;
-      }
-    }
-  } catch (e) {
-    console.error('LocalStorage parse error:', e);
+  if (localList.length > 0) {
+    return localList;
   }
 
   // Default seed
@@ -374,13 +400,19 @@ export const saveRosterEntry = async (entry) => {
       let url = `${config.dbUrl.replace(/\/$/, '')}/roster.json`;
       if (config.secretToken) url += `?auth=${config.secretToken}`;
       
-      await fetch(url, {
+      const res = await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newList)
       });
+      if (res.ok) {
+        localStorage.removeItem('diffsnow_roster_pending_sync');
+      } else {
+        localStorage.setItem('diffsnow_roster_pending_sync', 'true');
+      }
     } catch (err) {
       console.error('Firebase save failed:', err);
+      localStorage.setItem('diffsnow_roster_pending_sync', 'true');
     }
   }
 
@@ -399,13 +431,19 @@ export const deleteRosterEntry = async (id) => {
     try {
       let url = `${config.dbUrl.replace(/\/$/, '')}/roster.json`;
       if (config.secretToken) url += `?auth=${config.secretToken}`;
-      await fetch(url, {
+      const res = await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newList)
       });
+      if (res.ok) {
+        localStorage.removeItem('diffsnow_roster_pending_sync');
+      } else {
+        localStorage.setItem('diffsnow_roster_pending_sync', 'true');
+      }
     } catch (err) {
       console.error('Firebase delete error:', err);
+      localStorage.setItem('diffsnow_roster_pending_sync', 'true');
     }
   }
 

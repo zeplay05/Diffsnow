@@ -405,7 +405,7 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     }
   };
 
-  const handleSaveFirebase = () => {
+  const handleSaveFirebase = async () => {
     const cleanUrl = fbUrl.trim();
     const cleanToken = fbSecretToken.trim();
     localStorage.setItem('triples_fb_url', cleanUrl);
@@ -416,7 +416,13 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     setFbStatus('success');
     setFbMessage('บันทึกการตั้งค่า Firebase Realtime Database เรียบร้อยแล้ว!');
     fetchAllMembers();
-    setTimeout(() => setFbMessage(''), 3500);
+
+    // If secret token is provided and there are pending unsynced members, auto sync now!
+    if (cleanToken && localStorage.getItem('diffsnow_roster_pending_sync') === 'true') {
+      await handleSyncToFirebase();
+    } else {
+      setTimeout(() => setFbMessage(''), 3500);
+    }
   };
 
   const handleSyncToFirebase = async () => {
@@ -442,28 +448,31 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
       if (cleanToken) targetUrl += `?auth=${cleanToken}`;
 
       const allData = getAllMembers();
-      const membersList = allData['members'] || allData['diffsnow'] || [];
+      const currentList = (entries && entries.length > 0)
+        ? entries
+        : (rosterData['members'] || rosterData['diffsnow'] || allData['members'] || allData['diffsnow'] || []);
 
       const res = await fetch(targetUrl, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(membersList)
+        body: JSON.stringify(currentList)
       });
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
         if (res.status === 401 || res.status === 403 || errorData?.error?.toLowerCase?.().includes('permission denied')) {
-          throw new Error('Firebase ติดสิทธิ์ Permission Denied: กฎ Security Rules ใน Firebase Console ปิดอยู่ (วิธีแก้: ไปที่ Firebase Console -> Realtime Database -> Rules -> แก้เป็น .read: true, .write: true แล้วกด Publish)');
+          throw new Error('Firebase ติดสิทธิ์ Permission Denied: กฎ Security Rules บล็อกการเขียน (ให้คัดลอก Database Secret จาก Firebase Console มาใส่ในช่อง 2. ด้านบน หรือตั้งค่า Rules ให้ถูกต้อง)');
         }
         throw new Error(`HTTP Error ${res.status}: ${res.statusText}`);
       }
 
+      localStorage.removeItem('diffsnow_roster_pending_sync');
       setFbStatus('success');
-      setFbMessage('✓ เชื่อมต่อและซิงค์รายชื่อทั้งหมดขึ้น Firebase สำเร็จเรียบร้อย! ข้อมูลตรงกันทันทีแบบ Real-time');
+      setFbMessage(`✓ เชื่อมต่อและซิงค์รายชื่อสมาชิกทั้งหมด (${currentList.length} คน) ขึ้น Firebase สำเร็จเรียบร้อย! ข้อมูลตรงกันทุกเครื่องทันที`);
     } catch (err) {
       console.error(err);
       setFbStatus('error');
-      setFbMessage(`การเชื่อมต่อ Firebase ล้มเหลว: ${err.message || 'โปรดตรวจสอบ Database URL และ Database Rules'}`);
+      setFbMessage(`การเชื่อมต่อ Firebase ล้มเหลว: ${err.message || 'โปรดตรวจสอบ Database URL และ Database Secret'}`);
     } finally {
       setFbLoading(false);
     }
@@ -583,6 +592,9 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
       console.warn('LocalStorage save error:', e);
     }
 
+    let cloudSynced = false;
+    let cloudError = null;
+
     // Auto-sync to Firebase Realtime Database with await so cloud is 100% committed
     try {
       const config = getFirebaseConfig();
@@ -591,14 +603,23 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
       if (targetDbUrl) {
         let endpoint = `${targetDbUrl.replace(/\/$/, '')}/roster.json`;
         if (targetToken) endpoint += `?auth=${targetToken}`;
-        await fetch(endpoint, {
+        const res = await fetch(endpoint, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newEntries)
         });
+        if (res.ok) {
+          cloudSynced = true;
+          localStorage.removeItem('diffsnow_roster_pending_sync');
+        } else {
+          cloudError = res.status === 401 ? 'PERMISSION_DENIED' : `HTTP_${res.status}`;
+          localStorage.setItem('diffsnow_roster_pending_sync', 'true');
+        }
       }
     } catch (e) {
       console.warn('Firebase auto-push error:', e);
+      cloudError = e.message;
+      localStorage.setItem('diffsnow_roster_pending_sync', 'true');
     }
 
     // Broadcast update event and trigger parent refresh
@@ -609,6 +630,8 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     if (typeof onRefreshData === 'function') {
       onRefreshData();
     }
+
+    return { success: true, cloudSynced, cloudError };
   };
 
   // Rank helper: HEAD (1), LEADER (2), SUPPORTER (3), MEMBER (4)
@@ -827,17 +850,33 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     reader.onload = async (ev) => {
       try {
         const parsed = JSON.parse(ev.target.result);
+        let targetList = null;
+
         if (Array.isArray(parsed)) {
-          saveEntries(parsed);
-          alert(`นำเข้าข้อมูลสมาชิก ${currentRoster?.label || ''} สำเร็จ! (${parsed.length} คน)`);
+          targetList = parsed;
         } else if (parsed && typeof parsed === 'object') {
           if (parsed[currentRoster?.id] && Array.isArray(parsed[currentRoster.id])) {
-            saveEntries(parsed[currentRoster.id]);
-            alert(`นำเข้าข้อมูลสมาชิก ${currentRoster?.label || ''} จากไฟล์รวมสำเร็จ!`);
+            targetList = parsed[currentRoster.id];
+          } else if (parsed.members && Array.isArray(parsed.members)) {
+            targetList = parsed.members;
+          } else if (parsed.diffsnow && Array.isArray(parsed.diffsnow)) {
+            targetList = parsed.diffsnow;
           } else {
             await saveAllMembers(parsed);
             setRosterData(parsed);
             alert('นำเข้าฐานข้อมูลสมาชิก JSON ทั้งหมดสำเร็จ!');
+            return;
+          }
+        }
+
+        if (Array.isArray(targetList)) {
+          const syncRes = await saveEntries(targetList);
+          if (syncRes?.cloudSynced) {
+            alert(`✅ นำเข้าข้อมูลสมาชิก ${currentRoster?.label || ''} สำเร็จ! (${targetList.length} คน)\n\nบันทึกขึ้น Firebase Cloud สำเร็จเรียบร้อย ข้อมูลจะตรงกันทุกอุปกรณ์ทันที`);
+          } else if (syncRes?.cloudError === 'PERMISSION_DENIED') {
+            alert(`⚠️ นำเข้าข้อมูลสมาชิกในเครื่องนี้สำเร็จแล้ว (${targetList.length} คน) แต่ยังไม่สามารถส่งขึ้น Firebase ได้\n\n📌 สาเหตุ: Firebase แจ้ง Permission Denied (401)\nเนื่องจากคุณตั้งกฎ ".write": "auth != null" แต่ยังไม่ได้ใส่ Database Secret ในแท็บ "ฐานข้อมูล (Firebase)"\n\n🛡️ ระบบได้ล็อกข้อมูลนี้ไว้แล้ว รีเฟรชหน้าเว็บข้อมูลจะไม่หาย\n👉 เพื่อให้ในมือถืออัปเดตตรงกันด้วย: โปรดไปคัดลอก Database Secret จาก Firebase Console มาใส่ในแท็บ "ฐานข้อมูล (Firebase)" แล้วกดปุ่มบันทึกและซิงค์ครับ`);
+          } else {
+            alert(`นำเข้าข้อมูลสมาชิก ${currentRoster?.label || ''} สำเร็จ! (${targetList.length} คน)`);
           }
         } else {
           alert('รูปแบบไฟล์ JSON ไม่ถูกต้อง');
@@ -2064,8 +2103,12 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
   }
 }`}
                   </pre>
-                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>
-                    * <strong>สำหรับแอดมิน:</strong> ให้คัดลอก Database Secret จาก Firebase Console (Project Settings ⚙️ ➜ Service accounts ➜ Database secrets) มาวางในช่อง <strong>2. DATABASE SECRET / AUTH TOKEN</strong> ด้านบน แล้วกดบันทึก เพื่อให้แอดมินคนเดียวมีสิทธิ์จัดการทุกอย่าง
+                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, background: 'rgba(0,0,0,0.35)', padding: '10px 12px', borderRadius: '8px' }}>
+                    🔑 <strong>วิธีเอา Database Secret มาใส่เพื่อปลดล็อกสิทธิ์บันทึกให้แอดมิน (ทำครั้งเดียว):</strong><br />
+                    1. ใน <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" style={{ color: '#38bdf8', textDecoration: 'underline' }}>Firebase Console</a> คลิกที่รูปฟันเฟือง ⚙️ (Project settings) มุมซ้ายบนข้าง Project Overview<br />
+                    2. เลือกแท็บ <strong>Service accounts</strong> ➜ คลิกเมนูย่อยซ้ายมือ <strong>Database secrets</strong><br />
+                    3. คลิก <strong>Show (แสดง)</strong> ➜ กด <strong>Copy (คัดลอก)</strong> แล้วนำรหัสมาวางในช่อง <strong>2. DATABASE SECRET / AUTH TOKEN</strong> ด้านบน<br />
+                    4. กดปุ่ม <strong>"บันทึก Firebase Config"</strong> และกด <strong>"ทดสอบการเชื่อมต่อ & ซิงค์ข้อมูลทั้งหมดขึ้น Firebase"</strong>
                   </div>
                 </div>
               </div>
