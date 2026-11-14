@@ -475,8 +475,26 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
       }
 
       localStorage.removeItem('diffsnow_roster_pending_sync');
+
+      // Also sync current music settings so mobile gets the song immediately!
+      try {
+        let musicEndpoint = `${cleanUrl}/siteSettings/music.json`;
+        if (cleanToken) musicEndpoint += `?auth=${cleanToken}`;
+        await fetch(musicEndpoint, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: musicUrl || 'https://www.youtube.com/watch?v=6MCiaKFkhfg&t=13s',
+            volume: Number(musicVolume) || 50,
+            layout: musicLayout || 'STANDARD'
+          })
+        });
+      } catch (e) {
+        console.warn('Sync music notice:', e);
+      }
+
       setFbStatus('success');
-      setFbMessage(`✓ เชื่อมต่อและซิงค์รายชื่อสมาชิกทั้งหมด (${currentList.length} คน) ขึ้น Firebase สำเร็จเรียบร้อย! ข้อมูลตรงกันทุกเครื่องทันที`);
+      setFbMessage(`✓ เชื่อมต่อและซิงค์ข้อมูลทั้งหมด (${currentList.length} คน + เพลง) ขึ้น Firebase สำเร็จเรียบร้อย! ข้อมูลตรงกันทุกเครื่องทันที`);
     } catch (err) {
       console.error(err);
       setFbStatus('error');
