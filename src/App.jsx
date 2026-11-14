@@ -166,9 +166,13 @@ function App() {
     try {
       const saved = await saveSharedMusicSettings(settings);
       setMusicSettings(saved);
-      showToast('บันทึกการตั้งค่าเพลงและ UI เรียบร้อยแล้ว!');
+      if (saved?.cloudSynced === false) {
+        showToast('⚠️ เพลงบันทึกในเครื่องแล้ว (แต่ยังไม่ขึ้น Cloud เนื่องจากติดสิทธิ์ Firebase)');
+      } else {
+        showToast('✓ บันทึกการตั้งค่าเพลงขึ้น Cloud เรียบร้อยแล้ว!');
+      }
     } catch {
-      showToast('บันทึกในเครื่อง (กรุณาเชื่อม Firebase Database)');
+      showToast('บันทึกการตั้งค่าเพลงในเครื่อง');
     }
   };
 

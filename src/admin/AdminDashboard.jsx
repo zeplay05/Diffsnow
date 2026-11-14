@@ -818,13 +818,17 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     } else {
       updated = [...entries, payload];
     }
+    const rosterId = currentRoster?.id || 'members';
+    setRosterData(prev => ({ ...prev, [rosterId]: updated }));
     await saveEntries(updated);
     setShowAddModal(false);
   };
 
   const handleDeleteMember = async (id) => {
     if (window.confirm('ต้องการลบรายชื่อนี้หรือไม่?')) {
-      const updated = entries.filter(e => String(e.id) !== String(id) && e.name !== id);
+      const rosterId = currentRoster?.id || 'members';
+      const updated = entries.filter(e => String(e.id) !== String(id) && e.name !== id && String(e.id) !== String(id?.id));
+      setRosterData(prev => ({ ...prev, [rosterId]: updated }));
       await saveEntries(updated);
     }
   };

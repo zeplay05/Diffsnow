@@ -216,9 +216,14 @@ export const saveSharedMusicSettings = async (settings) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(next)
     });
-    if (!response.ok) console.warn('Could not sync music to Firebase, kept locally');
+    if (!response.ok) {
+      console.warn('Could not sync music to Firebase, kept locally. Status:', response.status);
+      return { ...next, cloudSynced: false, status: response.status };
+    }
+    return { ...next, cloudSynced: true };
   } catch (e) {
     console.warn('Firebase music save network warning:', e);
+    return { ...next, cloudSynced: false, error: e.message };
   }
   return next;
 };
@@ -313,24 +318,22 @@ export const fetchRosterEntries = async () => {
           }
 
           // CRITICAL PROTECTION:
-          // If the user recently imported or modified members locally (pending sync),
-          // and Firebase returns fewer/stale members because previous write was rejected or not synced,
-          // DO NOT overwrite the user's imported roster!
-          if (isPendingSync && localList.length > list.length) {
+          // If the user recently added, edited (avatar/info), or deleted members locally (pending sync),
+          // DO NOT overwrite the user's modifications with stale Firebase data!
+          if (isPendingSync && localList.length > 0) {
             console.info(`Preserving local pending roster (${localList.length} members) over stale Firebase data (${list.length} members)`);
-            // If secret token is now provided, try auto-pushing to Firebase
-            if (config.secretToken) {
-              fetch(url, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(localList)
-              }).then(r => {
-                if (r.ok) {
-                  localStorage.removeItem('diffsnow_roster_pending_sync');
-                  console.info('Auto-synced pending local roster to Firebase successfully');
-                }
-              }).catch(() => {});
-            }
+            // Try auto-pushing to Firebase if secretToken is present or if write might succeed
+            fetch(url, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(localList)
+            }).then(r => {
+              if (r.ok) {
+                localStorage.removeItem('diffsnow_roster_pending_sync');
+                console.info('Auto-synced pending local roster to Firebase successfully');
+              }
+            }).catch(() => {});
+
             return localList;
           }
           
