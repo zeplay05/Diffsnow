@@ -4,22 +4,48 @@
 import { getFirebaseConfig } from './firebaseService';
 
 const JOIN_REQUESTS_KEY = 'diffsnow_join_requests';
+const DELETED_REQUESTS_KEY = 'diffsnow_deleted_requests';
 
-// Get all join requests
-export const getJoinRequests = () => {
+// Get list of request IDs deleted by the admin so they never reappear
+const getDeletedRequestIds = () => {
   try {
-    const saved = localStorage.getItem(JOIN_REQUESTS_KEY);
+    const saved = localStorage.getItem(DELETED_REQUESTS_KEY);
     return saved ? JSON.parse(saved) : [];
   } catch {
     return [];
   }
 };
 
-// Shared source of truth for administrators.  Requests must never rely on the
+const markRequestDeleted = (id) => {
+  try {
+    const list = getDeletedRequestIds();
+    if (!list.includes(id)) {
+      list.push(id);
+      localStorage.setItem(DELETED_REQUESTS_KEY, JSON.stringify(list.slice(-200)));
+    }
+  } catch {}
+};
+
+// Get all join requests
+export const getJoinRequests = () => {
+  try {
+    const deletedIds = getDeletedRequestIds();
+    const saved = localStorage.getItem(JOIN_REQUESTS_KEY);
+    const list = saved ? JSON.parse(saved) : [];
+    return Array.isArray(list) ? list.filter(r => r && r.id && !deletedIds.includes(r.id)) : [];
+  } catch {
+    return [];
+  }
+};
+
+// Shared source of truth for administrators. Requests must never rely on the
 // submitter's browser storage, because that storage is private to their device.
 export const fetchJoinRequests = async () => {
   const config = getFirebaseConfig();
-  if (!config?.dbUrl?.trim()) return getJoinRequests();
+  const deletedIds = getDeletedRequestIds();
+  const localRequests = getJoinRequests();
+
+  if (!config?.dbUrl?.trim()) return localRequests;
 
   try {
     let url = `${config.dbUrl.replace(/\/$/, '')}/joinRequests.json`;
@@ -27,21 +53,26 @@ export const fetchJoinRequests = async () => {
     const response = await fetch(url);
     if (!response.ok) throw new Error('Unable to load join requests');
     const data = await response.json();
-    const requests = data ? Object.values(data) : [];
+    const rawList = data ? Object.values(data) : [];
+    const requests = rawList.filter(r => r && r.id && !deletedIds.includes(r.id));
     requests.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
     _saveAll(requests);
     return requests;
   } catch {
-    return getJoinRequests();
+    return localRequests;
   }
 };
 
 // Save all requests (internal)
 const _saveAll = (requests) => {
-  localStorage.setItem(JOIN_REQUESTS_KEY, JSON.stringify(requests));
+  const deletedIds = getDeletedRequestIds();
+  const cleaned = (Array.isArray(requests) ? requests : []).filter(r => r && r.id && !deletedIds.includes(r.id));
+  localStorage.setItem(JOIN_REQUESTS_KEY, JSON.stringify(cleaned));
   // Dispatch event so Admin tab can react in real-time
-  window.dispatchEvent(new Event('diffsnow_requests_updated'));
-  window.dispatchEvent(new Event('sameweknow_requests_updated'));
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('diffsnow_requests_updated'));
+    window.dispatchEvent(new Event('sameweknow_requests_updated'));
+  }
 };
 
 // Submit a new join request from public page
@@ -82,7 +113,11 @@ export const acceptJoinRequest = async (requestId, rankOrder = '4', customRole =
   );
   _saveAll(updated);
   const resolvedRequest = updated.find(r => r.id === requestId);
-  await _syncToFirebase(resolvedRequest);
+  try {
+    await _syncToFirebase(resolvedRequest);
+  } catch (e) {
+    console.warn('Firebase accept sync notice (saved locally):', e);
+  }
 
   const rankNumber = String(rankOrder || '4');
   const roleNames = {
@@ -123,15 +158,24 @@ export const rejectJoinRequest = async (requestId, reason) => {
       : r
   );
   _saveAll(updated);
-  await _syncToFirebase(updated.find(r => r.id === requestId));
+  try {
+    await _syncToFirebase(updated.find(r => r.id === requestId));
+  } catch (e) {
+    console.warn('Firebase reject sync notice (saved locally):', e);
+  }
   return updated;
 };
 
 // Delete a request (clean up)
 export const deleteJoinRequest = async (requestId) => {
+  markRequestDeleted(requestId);
   const updated = getJoinRequests().filter(r => r.id !== requestId);
-  await _deleteFromFirebase(requestId);
   _saveAll(updated);
+  try {
+    await _deleteFromFirebase(requestId);
+  } catch (err) {
+    console.warn('Firebase delete notice (removed locally):', err?.message || err);
+  }
   return updated;
 };
 
@@ -157,10 +201,16 @@ const _syncToFirebase = async (request) => {
 
 const _deleteFromFirebase = async (requestId) => {
   const config = getFirebaseConfig();
-  if (!config?.dbUrl?.trim()) throw new Error('Firebase is not configured');
+  if (!config?.dbUrl?.trim()) return;
   let url = `${config.dbUrl.replace(/\/$/, '')}/joinRequests/${requestId}.json`;
   if (config.secretToken) url += `?auth=${config.secretToken}`;
-  const response = await fetch(url, { method: 'DELETE' });
-  if (!response.ok) throw new Error('Unable to delete join request');
+  try {
+    const response = await fetch(url, { method: 'DELETE' });
+    if (!response.ok) {
+      console.warn(`Could not delete request ${requestId} on Firebase (${response.status})`);
+    }
+  } catch (e) {
+    console.warn('Firebase delete network error:', e);
+  }
 };
 

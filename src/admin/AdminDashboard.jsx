@@ -400,8 +400,16 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
 
   const handleDeleteRequest = async (id) => {
     if (window.confirm('ต้องการลบคำขอนี้หรือไม่?')) {
-      await deleteJoinRequest(id);
-      setJoinRequests(await fetchJoinRequests());
+      // Optimistic UI update: Remove from UI immediately!
+      setJoinRequests(prev => prev.filter(r => r.id !== id));
+      try {
+        const updated = await deleteJoinRequest(id);
+        if (Array.isArray(updated)) {
+          setJoinRequests(updated);
+        }
+      } catch (err) {
+        console.error('Delete request notice:', err);
+      }
     }
   };
 
@@ -2095,6 +2103,7 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     },
     "joinRequests": {
       ".read": "auth != null",
+      ".write": "auth != null",
       "$requestId": {
         ".write": "!data.exists() && newData.exists()",
         ".validate": "newData.hasChildren(['name', 'facebookUrl', 'status']) && newData.child('status').val() === 'pending'"
