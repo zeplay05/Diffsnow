@@ -35,7 +35,8 @@ export const fetchJoinRequests = async () => {
     }
     const data = await response.json();
     const rawList = data ? Object.values(data) : [];
-    const requests = rawList.filter(r => r && r.id);
+    // Only return active pending requests
+    const requests = rawList.filter(r => r && r.id && r.status === 'pending');
     requests.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
     
     // Save to local cache silently (without triggering event loop)
@@ -143,27 +144,9 @@ export const acceptJoinRequest = async (requestId, rankOrder = '4', customRole =
   return memberEntry;
 };
 
-// Admin: Reject a request with reason
+// Admin: Reject a request (deletes it locally and from Firebase)
 export const rejectJoinRequest = async (requestId, reason) => {
-  const requests = getJoinRequests();
-  const updated = requests.map(r =>
-    r.id === requestId
-      ? { ...r, status: 'rejected', rejectedReason: reason || '', resolvedAt: new Date().toISOString() }
-      : r
-  );
-  try {
-    localStorage.setItem(JOIN_REQUESTS_KEY, JSON.stringify(updated));
-  } catch {}
-
-  const rejectedRequest = updated.find(r => r.id === requestId);
-  if (rejectedRequest) {
-    try {
-      await _syncToFirebase(rejectedRequest);
-    } catch (e) {
-      console.warn('Firebase reject sync notice:', e);
-    }
-  }
-  return updated;
+  return deleteJoinRequest(requestId);
 };
 
 // Admin: Delete a request (removes locally and from Firebase)

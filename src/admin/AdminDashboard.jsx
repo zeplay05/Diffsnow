@@ -401,28 +401,41 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
 
   const handleConfirmAccept = async () => {
     if (!acceptTarget) return;
-    const newMember = await acceptJoinRequest(acceptTarget.id, acceptRank, acceptCustomRole);
-    if (newMember) {
-      const chosenAvatar = acceptAvatar || newMember.imageUrl || newMember.avatar || logoImg;
-      newMember.imageUrl = chosenAvatar;
-      newMember.avatar = chosenAvatar;
-      let currentList = rosterData['members'] || [];
-      try {
-        const freshList = await fetchRosterEntries();
-        if (Array.isArray(freshList) && freshList.length > 0) {
-          currentList = freshList;
-        }
-      } catch (e) {
-        console.warn('Fetch roster before accept error:', e);
-      }
-      const filtered = currentList.filter(m => (m.name || m.username) !== newMember.name && String(m.id) !== String(newMember.id));
-      const updatedList = [...filtered, newMember];
-      await saveEntries(updatedList, 'members');
-      setJoinRequests(await fetchJoinRequests());
-    }
+    const targetId = acceptTarget.id;
+    // Optimistic UI update: remove from requests list immediately
+    setJoinRequests(prev => prev.filter(r => r.id !== targetId));
     setShowAcceptModal(false);
-    setAcceptTarget(null);
-    setAcceptAvatar('');
+
+    try {
+      const newMember = await acceptJoinRequest(targetId, acceptRank, acceptCustomRole);
+      if (newMember) {
+        const chosenAvatar = acceptAvatar || newMember.imageUrl || newMember.avatar || logoImg;
+        newMember.imageUrl = chosenAvatar;
+        newMember.avatar = chosenAvatar;
+        let currentList = rosterData['members'] || [];
+        try {
+          const freshList = await fetchRosterEntries();
+          if (Array.isArray(freshList) && freshList.length > 0) {
+            currentList = freshList;
+          }
+        } catch (e) {
+          console.warn('Fetch roster before accept error:', e);
+        }
+        const filtered = currentList.filter(m => (m.name || m.username) !== newMember.name && String(m.id) !== String(newMember.id));
+        const updatedList = [...filtered, newMember];
+        await saveEntries(updatedList, 'members');
+        await deleteJoinRequest(targetId);
+        const fresh = await fetchJoinRequests();
+        if (Array.isArray(fresh)) {
+          setJoinRequests(fresh.filter(r => r.id !== targetId));
+        }
+      }
+    } catch (e) {
+      console.warn('Accept error:', e);
+    } finally {
+      setAcceptTarget(null);
+      setAcceptAvatar('');
+    }
   };
 
   const handleOpenRejectModal = (req) => {
@@ -433,10 +446,22 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
 
   const handleConfirmReject = async () => {
     if (!rejectTarget) return;
-    await rejectJoinRequest(rejectTarget.id, rejectReason.trim());
-    setJoinRequests(await fetchJoinRequests());
+    const targetId = rejectTarget.id;
+    // Optimistic UI update: Remove from list immediately
+    setJoinRequests(prev => prev.filter(r => r.id !== targetId));
     setShowRejectModal(false);
     setRejectTarget(null);
+    setRejectReason('');
+
+    try {
+      await deleteJoinRequest(targetId);
+      const fresh = await fetchJoinRequests();
+      if (Array.isArray(fresh)) {
+        setJoinRequests(fresh.filter(r => r.id !== targetId));
+      }
+    } catch (e) {
+      console.warn('Reject delete error:', e);
+    }
   };
 
   const handleDeleteRequest = async (id) => {
@@ -444,9 +469,10 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
       // Optimistic UI update: Remove from UI immediately!
       setJoinRequests(prev => prev.filter(r => r.id !== id));
       try {
-        const updated = await deleteJoinRequest(id);
-        if (Array.isArray(updated)) {
-          setJoinRequests(updated);
+        await deleteJoinRequest(id);
+        const fresh = await fetchJoinRequests();
+        if (Array.isArray(fresh)) {
+          setJoinRequests(fresh.filter(r => r.id !== id));
         }
       } catch (err) {
         console.error('Delete request notice:', err);
