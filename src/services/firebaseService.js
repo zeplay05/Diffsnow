@@ -20,7 +20,7 @@ const ADMIN_AUTH_KEY = 'diffsnow_admin_authed';
 const LOGO_URL_KEY = 'diffsnow_center_logo_url';
 
 export const DEFAULT_MUSIC_SETTINGS = {
-  url: 'https://www.youtube.com/watch?v=6MCiaKFkhfg&t=13s',
+  url: 'https://www.youtube.com/watch?v=Mx92lTYxrJQ&t=13s',
   volume: 50,
   layout: 'STANDARD',
   startTime: 13

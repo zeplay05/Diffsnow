@@ -245,6 +245,15 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
         if (data) setJoinRequests(data);
       });
     }
+    if (t === 'appearance') {
+      fetchSharedMusicSettings().then(settings => {
+        if (settings?.url) {
+          setMusicUrl(settings.url);
+          if (settings.volume !== undefined) setMusicVolume(Number(settings.volume));
+          if (settings.layout) setMusicLayout(settings.layout);
+        }
+      });
+    }
   };
 
   // Logo & Branding
@@ -538,19 +547,23 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
 
       localStorage.removeItem('diffsnow_roster_pending_sync');
 
-      // Also sync current music settings so mobile gets the song immediately!
+      // Also sync current music settings if admin configured them
       try {
         let musicEndpoint = `${cleanUrl}/siteSettings/music.json`;
         if (cleanToken) musicEndpoint += `?auth=${cleanToken}`;
-        await fetch(musicEndpoint, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: musicUrl || 'https://www.youtube.com/watch?v=6MCiaKFkhfg&t=13s',
-            volume: Number(musicVolume) || 50,
-            layout: musicLayout || 'STANDARD'
-          })
-        });
+        const currentFirebaseMusic = await fetch(`${cleanUrl}/siteSettings/music.json`).then(r => r.json()).catch(() => null);
+        const urlToSync = (musicUrl && !musicUrl.includes('6MCiaKFkhfg')) ? musicUrl : (currentFirebaseMusic?.url || musicUrl);
+        if (urlToSync) {
+          await fetch(musicEndpoint, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              url: urlToSync,
+              volume: Number(musicVolume) || currentFirebaseMusic?.volume || 50,
+              layout: musicLayout || currentFirebaseMusic?.layout || 'STANDARD'
+            })
+          });
+        }
       } catch (e) {
         console.warn('Sync music notice:', e);
       }
@@ -580,8 +593,8 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     const fromProps = musicSettings?.url;
     const saved = localStorage.getItem('diffsnow_music_url') || localStorage.getItem('triples_music_url');
     const candidate = fromProps || saved;
-    if (!candidate || candidate.trim() === '' || candidate.includes('szpLnpkuKr8') || candidate.includes('3pC31F2ijrM')) {
-      return 'https://www.youtube.com/watch?v=6MCiaKFkhfg&t=13s';
+    if (!candidate || candidate.trim() === '' || candidate.includes('szpLnpkuKr8') || candidate.includes('3pC31F2ijrM') || candidate.includes('6MCiaKFkhfg')) {
+      return 'https://www.youtube.com/watch?v=Mx92lTYxrJQ&t=13s';
     }
     return candidate;
   });
@@ -590,6 +603,30 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
   const [previewMode, setPreviewMode] = useState('pill'); // 'pill' | 'card'
   const [musicSaved, setMusicSaved] = useState(false);
   const [previewSaved, setPreviewSaved] = useState(false);
+
+  // Sync music state whenever musicSettings prop changes from parent / Firebase
+  useEffect(() => {
+    if (musicSettings?.url) {
+      setMusicUrl(musicSettings.url);
+    }
+    if (musicSettings?.volume !== undefined) {
+      setMusicVolume(Number(musicSettings.volume));
+    }
+    if (musicSettings?.layout) {
+      setMusicLayout(musicSettings.layout);
+    }
+  }, [musicSettings?.url, musicSettings?.volume, musicSettings?.layout]);
+
+  // Fetch live music from Firebase whenever opening the appearance tab or on mount
+  useEffect(() => {
+    fetchSharedMusicSettings().then(settings => {
+      if (settings?.url) {
+        setMusicUrl(settings.url);
+        if (settings.volume !== undefined) setMusicVolume(Number(settings.volume));
+        if (settings.layout) setMusicLayout(settings.layout);
+      }
+    });
+  }, [tab]);
 
   // Token / Passcode
   const [currentToken, setCurrentToken] = useState(() => {
