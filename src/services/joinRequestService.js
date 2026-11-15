@@ -1,45 +1,22 @@
 // Join Request Service — stores pending member join requests
-// Uses localStorage as primary store; Firebase sync if configured.
+// Powered by Firebase Realtime Database with local cache fallback.
 
 import { getFirebaseConfig, DEFAULT_FIREBASE_URL, DEFAULT_FIREBASE_SECRET } from './firebaseService';
 
 const JOIN_REQUESTS_KEY = 'diffsnow_join_requests';
-const DELETED_REQUESTS_KEY = 'diffsnow_deleted_requests';
 
-// Get list of request IDs deleted by the admin so they never reappear
-const getDeletedRequestIds = () => {
-  try {
-    const saved = localStorage.getItem(DELETED_REQUESTS_KEY);
-    return saved ? JSON.parse(saved) : [];
-  } catch {
-    return [];
-  }
-};
-
-const markRequestDeleted = (id) => {
-  try {
-    const list = getDeletedRequestIds();
-    if (!list.includes(id)) {
-      list.push(id);
-      localStorage.setItem(DELETED_REQUESTS_KEY, JSON.stringify(list.slice(-200)));
-    }
-  } catch {}
-};
-
-// Get all join requests
+// Get all cached join requests
 export const getJoinRequests = () => {
   try {
-    const deletedIds = getDeletedRequestIds();
     const saved = localStorage.getItem(JOIN_REQUESTS_KEY);
     const list = saved ? JSON.parse(saved) : [];
-    return Array.isArray(list) ? list.filter(r => r && r.id && !deletedIds.includes(r.id)) : [];
+    return Array.isArray(list) ? list.filter(r => r && r.id) : [];
   } catch {
     return [];
   }
 };
 
-// Shared source of truth for administrators. Requests must never rely on the
-// submitter's browser storage, because that storage is private to their device.
+// Fetch join requests directly from Firebase Realtime Database
 export const fetchJoinRequests = async () => {
   const config = getFirebaseConfig();
   const localRequests = getJoinRequests();
@@ -50,31 +27,28 @@ export const fetchJoinRequests = async () => {
   if (!dbUrl?.trim()) return localRequests;
 
   try {
-    let url = `${dbUrl.replace(/\/$/, '')}/joinRequests.json`;
-    if (token) url += `?auth=${token}`;
+    let url = `${dbUrl.replace(/\/$/, '')}/joinRequests.json?auth=${token}`;
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`Unable to load join requests: ${response.status}`);
+    if (!response.ok) {
+      console.warn(`Firebase joinRequests fetch warning (${response.status})`);
+      return localRequests;
+    }
     const data = await response.json();
     const rawList = data ? Object.values(data) : [];
     const requests = rawList.filter(r => r && r.id);
     requests.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
-    _saveAll(requests);
+    
+    // Save to local cache silently (without triggering event loop)
+    try {
+      localStorage.setItem(JOIN_REQUESTS_KEY, JSON.stringify(requests));
+      // Clean up legacy deleted ids key if present
+      localStorage.removeItem('diffsnow_deleted_requests');
+    } catch {}
+
     return requests;
   } catch (err) {
     console.warn('fetchJoinRequests fallback to local:', err);
     return localRequests;
-  }
-};
-
-// Save all requests (internal)
-const _saveAll = (requests) => {
-  const deletedIds = getDeletedRequestIds();
-  const cleaned = (Array.isArray(requests) ? requests : []).filter(r => r && r.id && !deletedIds.includes(r.id));
-  localStorage.setItem(JOIN_REQUESTS_KEY, JSON.stringify(cleaned));
-  // Dispatch event so Admin tab can react in real-time
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new Event('diffsnow_requests_updated'));
-    window.dispatchEvent(new Event('sameweknow_requests_updated'));
   }
 };
 
@@ -83,9 +57,8 @@ export const submitJoinRequest = async (data) => {
   const avatarUrl = data.imageUrl || data.avatar || '';
   const newRequest = {
     id: `req-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-    status: 'pending',         // 'pending' | 'accepted' | 'rejected'
+    status: 'pending', // 'pending' | 'accepted' | 'rejected'
     submittedAt: new Date().toISOString(),
-    // Facebook name is the single source of the public display name.
     name: data.facebookName || '',
     facebookName: data.facebookName || '',
     facebookUrl: data.facebookUrl || '',
@@ -95,31 +68,50 @@ export const submitJoinRequest = async (data) => {
     rejectedReason: ''
   };
 
-  // Always save locally first so request is never lost
+  // Save locally first
   const requests = getJoinRequests();
-  _saveAll([newRequest, ...requests.filter(request => request.id !== newRequest.id)]);
+  const nextList = [newRequest, ...requests.filter(r => r.id !== newRequest.id)];
+  try {
+    localStorage.setItem(JOIN_REQUESTS_KEY, JSON.stringify(nextList));
+  } catch {}
 
-  // Sync to Firebase (required so administrators on other devices can see it)
+  // Sync to Firebase
   await _syncToFirebase(newRequest);
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('diffsnow_requests_updated'));
+  }
 
   return newRequest;
 };
 
 // Admin: Accept a request — returns the created member object
 export const acceptJoinRequest = async (requestId, rankOrder = '4', customRole = '') => {
-  const requests = getJoinRequests();
-  const req = requests.find(r => r.id === requestId);
+  let requests = getJoinRequests();
+  let req = requests.find(r => r.id === requestId);
+  
+  if (!req) {
+    const fresh = await fetchJoinRequests();
+    req = fresh.find(r => r.id === requestId);
+    requests = fresh;
+  }
   if (!req) return null;
 
-  const updated = requests.map(r =>
-    r.id === requestId ? { ...r, status: 'accepted', resolvedAt: new Date().toISOString() } : r
-  );
-  _saveAll(updated);
-  const resolvedRequest = updated.find(r => r.id === requestId);
+  const resolvedRequest = {
+    ...req,
+    status: 'accepted',
+    resolvedAt: new Date().toISOString()
+  };
+
+  const updated = requests.map(r => r.id === requestId ? resolvedRequest : r);
+  try {
+    localStorage.setItem(JOIN_REQUESTS_KEY, JSON.stringify(updated));
+  } catch {}
+
   try {
     await _syncToFirebase(resolvedRequest);
   } catch (e) {
-    console.warn('Firebase accept sync notice (saved locally):', e);
+    console.warn('Firebase accept sync notice:', e);
   }
 
   const rankNumber = String(rankOrder || '4');
@@ -131,7 +123,6 @@ export const acceptJoinRequest = async (requestId, rankOrder = '4', customRole =
   };
   const role = customRole?.trim() || roleNames[rankNumber] || 'Member';
 
-  // Build a roster entry from the request data
   const memberEntry = {
     id: `mem-${Date.now()}`,
     name: req.facebookName || req.name || 'Unknown',
@@ -160,38 +151,45 @@ export const rejectJoinRequest = async (requestId, reason) => {
       ? { ...r, status: 'rejected', rejectedReason: reason || '', resolvedAt: new Date().toISOString() }
       : r
   );
-  _saveAll(updated);
   try {
-    await _syncToFirebase(updated.find(r => r.id === requestId));
-  } catch (e) {
-    console.warn('Firebase reject sync notice (saved locally):', e);
+    localStorage.setItem(JOIN_REQUESTS_KEY, JSON.stringify(updated));
+  } catch {}
+
+  const rejectedRequest = updated.find(r => r.id === requestId);
+  if (rejectedRequest) {
+    try {
+      await _syncToFirebase(rejectedRequest);
+    } catch (e) {
+      console.warn('Firebase reject sync notice:', e);
+    }
   }
   return updated;
 };
 
-// Delete a request (clean up)
+// Admin: Delete a request (removes locally and from Firebase)
 export const deleteJoinRequest = async (requestId) => {
-  markRequestDeleted(requestId);
-  const updated = getJoinRequests().filter(r => r.id !== requestId);
-  _saveAll(updated);
+  const requests = getJoinRequests();
+  const updated = requests.filter(r => r.id !== requestId);
+  try {
+    localStorage.setItem(JOIN_REQUESTS_KEY, JSON.stringify(updated));
+  } catch {}
+
   try {
     await _deleteFromFirebase(requestId);
   } catch (err) {
-    console.warn('Firebase delete notice (removed locally):', err?.message || err);
+    console.warn('Firebase delete notice:', err);
   }
   return updated;
 };
 
-// Sync a single request to Firebase (best-effort)
+// Sync a single request to Firebase
 const _syncToFirebase = async (request) => {
   const config = getFirebaseConfig();
   const dbUrl = config?.dbUrl || DEFAULT_FIREBASE_URL;
   const token = config?.secretToken || DEFAULT_FIREBASE_SECRET;
   if (!dbUrl?.trim()) return;
 
-  let url = `${dbUrl.replace(/\/$/, '')}/joinRequests/${request.id}.json`;
-  if (token) url += `?auth=${token}`;
-
+  let url = `${dbUrl.replace(/\/$/, '')}/joinRequests/${request.id}.json?auth=${token}`;
   const response = await fetch(url, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -202,18 +200,18 @@ const _syncToFirebase = async (request) => {
     if (response.status === 401 || response.status === 403 || data?.error?.toLowerCase?.().includes('permission denied')) {
       throw new Error('FIREBASE_PERMISSION_DENIED');
     }
-    throw new Error('Unable to submit join request');
+    throw new Error(`Unable to sync join request: ${response.status}`);
   }
 };
 
+// Delete a single request from Firebase
 const _deleteFromFirebase = async (requestId) => {
   const config = getFirebaseConfig();
   const dbUrl = config?.dbUrl || DEFAULT_FIREBASE_URL;
   const token = config?.secretToken || DEFAULT_FIREBASE_SECRET;
   if (!dbUrl?.trim()) return;
 
-  let url = `${dbUrl.replace(/\/$/, '')}/joinRequests/${requestId}.json`;
-  if (token) url += `?auth=${token}`;
+  let url = `${dbUrl.replace(/\/$/, '')}/joinRequests/${requestId}.json?auth=${token}`;
   try {
     const response = await fetch(url, { method: 'DELETE' });
     if (!response.ok) {
@@ -223,4 +221,3 @@ const _deleteFromFirebase = async (requestId) => {
     console.warn('Firebase delete network error:', e);
   }
 };
-

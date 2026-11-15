@@ -22,7 +22,9 @@ import {
   saveSharedMusicSettings,
   loginFirebaseAuth,
   logoutFirebaseAuth,
-  getFirebaseAuthUser
+  getFirebaseAuthUser,
+  DEFAULT_FIREBASE_SECRET,
+  DEFAULT_FIREBASE_URL
 } from '../services/firebaseService';
 import './admin.css';
 
@@ -243,7 +245,7 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     setSidebarOpen(false);
     if (t === 'requests') {
       fetchJoinRequests().then(data => {
-        if (data) setJoinRequests(data);
+        if (Array.isArray(data)) setJoinRequests(data);
       });
     }
     if (t === 'appearance') {
@@ -360,19 +362,29 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
   const [rejectTarget, setRejectTarget] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
 
-  useEffect(() => {
-    const refreshRequests = async () => {
-      const data = await fetchJoinRequests();
-      if (data) setJoinRequests(data);
-    };
-    refreshRequests();
+  const [requestsLoading, setRequestsLoading] = useState(false);
 
-    window.addEventListener('diffsnow_requests_updated', refreshRequests);
-    window.addEventListener('sameweknow_requests_updated', refreshRequests);
-    const poll = setInterval(refreshRequests, 10000);
+  const handleRefreshRequests = async () => {
+    setRequestsLoading(true);
+    try {
+      const data = await fetchJoinRequests();
+      if (Array.isArray(data)) setJoinRequests(data);
+    } catch (e) {
+      console.warn('Refresh requests error:', e);
+    } finally {
+      setRequestsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    handleRefreshRequests();
+
+    window.addEventListener('diffsnow_requests_updated', handleRefreshRequests);
+    window.addEventListener('sameweknow_requests_updated', handleRefreshRequests);
+    const poll = setInterval(handleRefreshRequests, 8000);
     return () => {
-      window.removeEventListener('diffsnow_requests_updated', refreshRequests);
-      window.removeEventListener('sameweknow_requests_updated', refreshRequests);
+      window.removeEventListener('diffsnow_requests_updated', handleRefreshRequests);
+      window.removeEventListener('sameweknow_requests_updated', handleRefreshRequests);
       clearInterval(poll);
     };
   }, []);
@@ -514,18 +526,18 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     setFbMessage('กำลังเชื่อมต่อและซิงค์ข้อมูลขึ้น Firebase Realtime Database...');
 
     const cleanUrl = fbUrl.trim().replace(/\/$/, '');
-    const cleanToken = (authUser?.token && authUser.token.trim()) || fbSecretToken.trim();
+    let cleanToken = (authUser?.token && authUser.token.trim()) || fbSecretToken.trim();
+    if (!cleanToken || cleanToken.startsWith('AIza')) {
+      cleanToken = DEFAULT_FIREBASE_SECRET;
+    }
     localStorage.setItem('triples_fb_url', cleanUrl);
     localStorage.setItem('diffsnow_fb_url', cleanUrl);
-    if (cleanToken) {
-      localStorage.setItem('triples_fb_secret', cleanToken);
-      localStorage.setItem('diffsnow_fb_secret', cleanToken);
-    }
+    localStorage.setItem('triples_fb_secret', cleanToken);
+    localStorage.setItem('diffsnow_fb_secret', cleanToken);
     localStorage.setItem('diffsnow_firebase_config', JSON.stringify({ dbUrl: cleanUrl, secretToken: cleanToken }));
 
     try {
-      let targetUrl = `${cleanUrl}/roster.json`;
-      if (cleanToken) targetUrl += `?auth=${cleanToken}`;
+      let targetUrl = `${cleanUrl}/roster.json?auth=${cleanToken}`;
 
       const allData = getAllMembers();
       const currentList = (entries && entries.length > 0)
@@ -725,10 +737,9 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
     try {
       const config = getFirebaseConfig();
       const targetDbUrl = (fbUrl && fbUrl.trim()) || config?.dbUrl;
-      const targetToken = (fbSecretToken && fbSecretToken.trim()) || config?.secretToken;
+      const targetToken = config?.secretToken || DEFAULT_FIREBASE_SECRET;
       if (targetDbUrl) {
-        let endpoint = `${targetDbUrl.replace(/\/$/, '')}/roster.json`;
-        if (targetToken) endpoint += `?auth=${targetToken}`;
+        let endpoint = `${targetDbUrl.replace(/\/$/, '')}/roster.json?auth=${targetToken}`;
         const res = await fetch(endpoint, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -1860,10 +1871,8 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                 <button
                   type="button"
-                  onClick={async () => {
-                    const data = await fetchJoinRequests();
-                    if (data) setJoinRequests(data);
-                  }}
+                  onClick={handleRefreshRequests}
+                  disabled={requestsLoading}
                   style={{
                     padding: '6px 14px',
                     borderRadius: '10px',
@@ -1872,16 +1881,17 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
                     background: 'rgba(59, 130, 246, 0.15)',
                     border: '1px solid rgba(59, 130, 246, 0.35)',
                     color: '#60a5fa',
-                    cursor: 'pointer',
+                    cursor: requestsLoading ? 'wait' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
-                    transition: 'all 0.2s'
+                    transition: 'all 0.2s',
+                    opacity: requestsLoading ? 0.7 : 1
                   }}
                   onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(59, 130, 246, 0.25)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(59, 130, 246, 0.15)'; }}
                 >
-                  🔄 รีเฟรชคำขอ
+                  {requestsLoading ? '⏳ กำลังดึงข้อมูล...' : '🔄 รีเฟรชคำขอ'}
                 </button>
                 <span style={{
                   padding: '6px 14px',
@@ -1909,7 +1919,22 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
             </div>
 
             {/* Request Content / Empty state */}
-            {joinRequests.length === 0 ? (
+            {requestsLoading ? (
+              <div style={{
+                minHeight: '320px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '60px 20px',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '38px', marginBottom: '14px' }}>⏳</div>
+                <div style={{ fontSize: '15px', fontWeight: '700', color: '#60a5fa' }}>
+                  กำลังดึงข้อมูลคำขอจากระบบคลาวด์ Firebase...
+                </div>
+              </div>
+            ) : joinRequests.length === 0 ? (
               <div style={{
                 minHeight: '400px',
                 display: 'flex',

@@ -221,43 +221,48 @@ export const refreshFirebaseAuthToken = async () => {
 };
 
 export const getFirebaseConfig = () => {
-  let activeToken = '';
+  let activeToken = DEFAULT_FIREBASE_SECRET;
 
   if (typeof window !== 'undefined') {
+    // If user's localStorage contains the Web API key as secret (starts with AIza), clean it up
+    const storedSecret = localStorage.getItem('diffsnow_fb_secret') || localStorage.getItem('triples_fb_secret') || '';
+    if (storedSecret.startsWith('AIza')) {
+      localStorage.removeItem('diffsnow_fb_secret');
+      localStorage.removeItem('triples_fb_secret');
+      try {
+        const savedCfg = localStorage.getItem(FIREBASE_CONFIG_KEY);
+        if (savedCfg) {
+          const parsed = JSON.parse(savedCfg);
+          if (parsed.secretToken && parsed.secretToken.startsWith('AIza')) {
+            parsed.secretToken = DEFAULT_FIREBASE_SECRET;
+            localStorage.setItem(FIREBASE_CONFIG_KEY, JSON.stringify(parsed));
+          }
+        }
+      } catch {}
+    }
+
     const idToken = localStorage.getItem('diffsnow_fb_id_token') || '';
     const expiresAt = Number(localStorage.getItem('diffsnow_fb_token_expires') || 0);
-    const legacySecret = localStorage.getItem('diffsnow_fb_secret') || localStorage.getItem('triples_fb_secret') || '';
 
-    // Check if ID token is still valid (not expired)
-    const isTokenValid = Boolean(idToken && (!expiresAt || Date.now() < expiresAt));
+    // Check if ID token is still valid (not expired) and has valid JWT format
+    const isTokenValid = Boolean(idToken && idToken.includes('.') && (!expiresAt || Date.now() < expiresAt));
 
     // If ID token is close to expiry (within 2 minutes), trigger refresh in background
     if (idToken && expiresAt && Date.now() >= expiresAt - 120000) {
       refreshFirebaseAuthToken().catch(() => {});
     }
 
-    activeToken = (isTokenValid ? idToken : '') || legacySecret || DEFAULT_FIREBASE_SECRET;
-  } else {
-    activeToken = DEFAULT_FIREBASE_SECRET;
+    if (isTokenValid) {
+      activeToken = idToken;
+    } else {
+      activeToken = DEFAULT_FIREBASE_SECRET;
+    }
   }
 
-  const defaults = {
+  return {
     dbUrl: DEFAULT_FIREBASE_URL,
     secretToken: activeToken || DEFAULT_FIREBASE_SECRET
   };
-
-  try {
-    const saved = localStorage.getItem(FIREBASE_CONFIG_KEY);
-    if (!saved) return defaults;
-
-    const parsed = JSON.parse(saved);
-    return {
-      dbUrl: parsed.dbUrl || DEFAULT_FIREBASE_URL,
-      secretToken: activeToken || parsed.secretToken || DEFAULT_FIREBASE_SECRET
-    };
-  } catch (e) {
-    return defaults;
-  }
 };
 
 export const saveFirebaseConfig = (config) => {
