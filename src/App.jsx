@@ -169,10 +169,12 @@ function App() {
       if (saved?.cloudSynced === false) {
         showToast('⚠️ เพลงบันทึกในเครื่องแล้ว (แต่ยังไม่ขึ้น Cloud เนื่องจากติดสิทธิ์ Firebase)');
       } else {
-        showToast('✓ บันทึกการตั้งค่าเพลงขึ้น Cloud เรียบร้อยแล้ว!');
+        showToast('✓ บันทึกการตั้งค่าเพลงขึ้น Cloud เรียบร้อยแล้ว (มือถือจะเปลี่ยนตามทันที)!');
       }
+      return saved;
     } catch {
       showToast('บันทึกการตั้งค่าเพลงในเครื่อง');
+      return null;
     }
   };
 

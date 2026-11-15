@@ -1,7 +1,7 @@
 // Join Request Service — stores pending member join requests
 // Uses localStorage as primary store; Firebase sync if configured.
 
-import { getFirebaseConfig } from './firebaseService';
+import { getFirebaseConfig, DEFAULT_FIREBASE_URL, DEFAULT_FIREBASE_SECRET } from './firebaseService';
 
 const JOIN_REQUESTS_KEY = 'diffsnow_join_requests';
 const DELETED_REQUESTS_KEY = 'diffsnow_deleted_requests';
@@ -42,23 +42,26 @@ export const getJoinRequests = () => {
 // submitter's browser storage, because that storage is private to their device.
 export const fetchJoinRequests = async () => {
   const config = getFirebaseConfig();
-  const deletedIds = getDeletedRequestIds();
   const localRequests = getJoinRequests();
 
-  if (!config?.dbUrl?.trim()) return localRequests;
+  const dbUrl = config?.dbUrl || DEFAULT_FIREBASE_URL;
+  const token = config?.secretToken || DEFAULT_FIREBASE_SECRET;
+
+  if (!dbUrl?.trim()) return localRequests;
 
   try {
-    let url = `${config.dbUrl.replace(/\/$/, '')}/joinRequests.json`;
-    if (config.secretToken) url += `?auth=${config.secretToken}`;
+    let url = `${dbUrl.replace(/\/$/, '')}/joinRequests.json`;
+    if (token) url += `?auth=${token}`;
     const response = await fetch(url);
-    if (!response.ok) throw new Error('Unable to load join requests');
+    if (!response.ok) throw new Error(`Unable to load join requests: ${response.status}`);
     const data = await response.json();
     const rawList = data ? Object.values(data) : [];
-    const requests = rawList.filter(r => r && r.id && !deletedIds.includes(r.id));
+    const requests = rawList.filter(r => r && r.id);
     requests.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
     _saveAll(requests);
     return requests;
-  } catch {
+  } catch (err) {
+    console.warn('fetchJoinRequests fallback to local:', err);
     return localRequests;
   }
 };
@@ -182,9 +185,13 @@ export const deleteJoinRequest = async (requestId) => {
 // Sync a single request to Firebase (best-effort)
 const _syncToFirebase = async (request) => {
   const config = getFirebaseConfig();
-  if (!config?.dbUrl?.trim()) return;
-  let url = `${config.dbUrl.replace(/\/$/, '')}/joinRequests/${request.id}.json`;
-  if (config.secretToken) url += `?auth=${config.secretToken}`;
+  const dbUrl = config?.dbUrl || DEFAULT_FIREBASE_URL;
+  const token = config?.secretToken || DEFAULT_FIREBASE_SECRET;
+  if (!dbUrl?.trim()) return;
+
+  let url = `${dbUrl.replace(/\/$/, '')}/joinRequests/${request.id}.json`;
+  if (token) url += `?auth=${token}`;
+
   const response = await fetch(url, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -201,9 +208,12 @@ const _syncToFirebase = async (request) => {
 
 const _deleteFromFirebase = async (requestId) => {
   const config = getFirebaseConfig();
-  if (!config?.dbUrl?.trim()) return;
-  let url = `${config.dbUrl.replace(/\/$/, '')}/joinRequests/${requestId}.json`;
-  if (config.secretToken) url += `?auth=${config.secretToken}`;
+  const dbUrl = config?.dbUrl || DEFAULT_FIREBASE_URL;
+  const token = config?.secretToken || DEFAULT_FIREBASE_SECRET;
+  if (!dbUrl?.trim()) return;
+
+  let url = `${dbUrl.replace(/\/$/, '')}/joinRequests/${requestId}.json`;
+  if (token) url += `?auth=${token}`;
   try {
     const response = await fetch(url, { method: 'DELETE' });
     if (!response.ok) {

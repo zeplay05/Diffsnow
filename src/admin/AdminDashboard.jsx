@@ -240,6 +240,11 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
   const selectTab = (t) => {
     setTab(t);
     setSidebarOpen(false);
+    if (t === 'requests') {
+      fetchJoinRequests().then(data => {
+        if (data) setJoinRequests(data);
+      });
+    }
   };
 
   // Logo & Branding
@@ -1814,7 +1819,32 @@ export default function AdminDashboard({ onLogout, onGoToLiveSite, onRefreshData
               </div>
 
               {/* Status Badges on the right */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const data = await fetchJoinRequests();
+                    if (data) setJoinRequests(data);
+                  }}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: '10px',
+                    fontSize: '12px',
+                    fontWeight: '700',
+                    background: 'rgba(59, 130, 246, 0.15)',
+                    border: '1px solid rgba(59, 130, 246, 0.35)',
+                    color: '#60a5fa',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(59, 130, 246, 0.25)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(59, 130, 246, 0.15)'; }}
+                >
+                  🔄 รีเฟรชคำขอ
+                </button>
                 <span style={{
                   padding: '6px 14px',
                   borderRadius: '10px',

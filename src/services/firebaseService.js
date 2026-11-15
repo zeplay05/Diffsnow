@@ -128,6 +128,7 @@ export const saveCenterLogoUrl = (url) => {
 };
 
 export const DEFAULT_FIREBASE_URL = 'https://diffsnow-database-default-rtdb.asia-southeast1.firebasedatabase.app';
+export const DEFAULT_FIREBASE_SECRET = 'TVIof3nZbQxuP2lR9YuB4Mk69lkqj0UBbOieN9CZ';
 
 // ─── Firebase Authentication (Email/Password Admin Login) ────────────────────
 export const loginFirebaseAuth = async (email, password) => {
@@ -227,17 +228,22 @@ export const getFirebaseConfig = () => {
     const expiresAt = Number(localStorage.getItem('diffsnow_fb_token_expires') || 0);
     const legacySecret = localStorage.getItem('diffsnow_fb_secret') || localStorage.getItem('triples_fb_secret') || '';
 
+    // Check if ID token is still valid (not expired)
+    const isTokenValid = Boolean(idToken && (!expiresAt || Date.now() < expiresAt));
+
     // If ID token is close to expiry (within 2 minutes), trigger refresh in background
-    if (idToken && Date.now() >= expiresAt - 120000) {
+    if (idToken && expiresAt && Date.now() >= expiresAt - 120000) {
       refreshFirebaseAuthToken().catch(() => {});
     }
 
-    activeToken = idToken || legacySecret;
+    activeToken = (isTokenValid ? idToken : '') || legacySecret || DEFAULT_FIREBASE_SECRET;
+  } else {
+    activeToken = DEFAULT_FIREBASE_SECRET;
   }
 
   const defaults = {
     dbUrl: DEFAULT_FIREBASE_URL,
-    secretToken: activeToken
+    secretToken: activeToken || DEFAULT_FIREBASE_SECRET
   };
 
   try {
@@ -247,7 +253,7 @@ export const getFirebaseConfig = () => {
     const parsed = JSON.parse(saved);
     return {
       dbUrl: parsed.dbUrl || DEFAULT_FIREBASE_URL,
-      secretToken: activeToken || parsed.secretToken || ''
+      secretToken: activeToken || parsed.secretToken || DEFAULT_FIREBASE_SECRET
     };
   } catch (e) {
     return defaults;
@@ -312,7 +318,9 @@ export const saveSharedMusicSettings = async (settings) => {
     localStorage.setItem('triples_music_layout', next.layout);
   }
 
-  const { dbUrl, secretToken } = getFirebaseConfig();
+  const config = getFirebaseConfig();
+  const dbUrl = config.dbUrl || DEFAULT_FIREBASE_URL;
+  const secretToken = config.secretToken || DEFAULT_FIREBASE_SECRET;
   if (!dbUrl) return next;
 
   try {
