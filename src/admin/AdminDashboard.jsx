@@ -18,6 +18,7 @@ import {
 import {
   getFirebaseConfig,
   fetchRosterEntries,
+  fetchSharedMusicSettings,
   saveSharedMusicSettings,
   loginFirebaseAuth,
   logoutFirebaseAuth,
